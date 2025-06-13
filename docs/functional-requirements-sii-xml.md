@@ -1,4 +1,5 @@
 # Functional Requirements Document
+
 ## Energy Offer XML Generator Application
 
 Version: 1.0  
@@ -7,12 +8,15 @@ Date: March 3, 2025
 ## 1. Introduction
 
 ### 1.1 Purpose
+
 This document outlines the functional requirements for a web application designed to collect data and generate XML files compliant with the SII (Sistema Informativo Integrato) specifications for energy and gas market offers in Italy, as described in document "Trasmissione Offerte" version 4.5 dated December 6, 2023.
 
 ### 1.2 Scope
+
 The application will provide a user-friendly interface for energy providers to input their offer details, validate the data according to SII requirements, and generate properly formatted XML files ready for submission to the SII platform. The system must strictly adhere to all format constraints, field validations, and conditional requirements outlined in the SII specification.
 
 ### 1.3 Definitions and Acronyms
+
 - **SII**: Sistema Informativo Integrato per la Gestione dei Flussi Informativi Relativi ai Mercati dell'Energia Elettrica e del Gas
 - **XML**: Extensible Markup Language
 - **PIVA**: Partita IVA (Italian VAT Number)
@@ -35,6 +39,7 @@ No authentication or user management is required
 ### 3.2 Offer Creation and Management
 
 #### 3.2.1 Offer Creation
+
 - FR-2.1: The system shall provide a step-by-step interface for creating new offers.
 - FR-2.2: The system shall guide users through all required sections defined in the SII specification.
 - FR-2.3: The system shall support both creation of new offers ("INSERIMENTO") and updating existing offers ("AGGIORNAMENTO").
@@ -44,84 +49,99 @@ No authentication or user management is required
   - DESCRIZIONE: free text field, maximum 25 alphanumeric characters (spaces and underscores not allowed)
 
 #### 3.2.2 Offer Management
+
 - FR-2.5: Offers will not be persisted anywhere
 
 ### 3.3 Data Collection Forms
 
 #### 3.3.1 Identification Information (Identificativi Offerta)
+
 - FR-3.1: The system shall collect basic offer identification information:
   - Partita IVA (PIVA_UTENTE) - Alfanumerico (16)
   - Offer code (COD_OFFERTA) - Alfanumerico (32) - This is the unique code that will be used in the CODICE CONTRATTO field during the subscription of the offer by the end customer in the switching request.
 
 #### 3.3.2 Offer Details (DettaglioOfferta)
+
 - FR-3.2: The system shall collect market type information (TIPO_MERCATO):
+
   - Electricity (01)
   - Gas (02)
   - Dual Fuel (03)
-  This field is mandatory and must be Alfanumerico (2).
+    This field is mandatory and must be Alfanumerico (2).
 
 - FR-3.3: The system shall collect if the offer can be subscribed individually (OFFERTA_SINGOLA):
+
   - Yes (SI) - offer can be subscribed individually
   - No (NO) - offer can only be subscribed in combination with an offer of another commodity
-  This field is mandatory if TIPO_MERCATO is not 03 (Dual Fuel) and must be Alfanumerico (2).
+    This field is mandatory if TIPO_MERCATO is not 03 (Dual Fuel) and must be Alfanumerico (2).
 
 - FR-3.4: The system shall collect client type information (TIPO_CLIENTE):
+
   - Domestic (01)
   - Other Uses (02)
   - Residential Condominium (Gas) (03)
-  This field is mandatory and must be Numerico (2).
+    This field is mandatory and must be Numerico (2).
 
 - FR-3.5: The system shall collect residential status (DOMESTICO_RESIDENTE) when applicable:
+
   - Domestic Resident (01)
   - Domestic Non-Resident (02)
   - All types (03)
-  This field is optional and must be Alfanumerico (2).
+    This field is optional and must be Alfanumerico (2).
 
 - FR-3.6: The system shall collect offer type details (TIPO_OFFERTA):
+
   - Fixed (01)
   - Variable (02)
   - FLAT (03)
-  This field is mandatory and must be Numerico (2).
+    This field is mandatory and must be Numerico (2).
 
 - FR-3.7: The system shall collect contract activation types (TIPOLOGIA_ATT_CONTR):
+
   - Supplier Change (01)
   - First Activation (Meter not present) (02)
   - Reactivation (Meter present but deactivated) (03)
   - Contract Transfer (04)
   - Always (99)
-  This field is mandatory, must be Numerico (2), and can occur multiple times (marked with * in the specification).
+    This field is mandatory, must be Numerico (2), and can occur multiple times (marked with \* in the specification).
 
 - FR-3.8: The system shall collect the offer name (NOME_OFFERTA) - Alfanumerico (255), mandatory.
 
 - FR-3.9: The system shall collect offer description (DESCRIZIONE) - Alfanumerico (3000), mandatory.
 
 - FR-3.10: The system shall collect offer duration in months (DURATA), specifying the duration of the economic conditions:
+
   - Value -1 for indeterminate duration
   - Otherwise, a value from 1 to 99
-  This field is mandatory and must be Numerico (2).
+    This field is mandatory and must be Numerico (2).
 
 - FR-3.11: The system shall collect information about required guarantees (GARANZIE) such as security deposits/domiciliation. If no guarantee is required, the value should be "NO". This field is mandatory and must be Alfanumerico (3000).
 
 #### 3.3.3 Activation Methods (DettaglioOfferta/ModalitaAttivazione)
+
 - FR-3.12: The system shall collect activation methods (MODALITA) with multiple selection capability:
+
   - Web-only activation (01)
   - Any channel activation (02)
   - Point of sale (03)
   - Teleselling (04)
   - Agency (05)
   - Other (99)
-  This field is mandatory, must be Alfanumerico (2), and can occur multiple times.
+    This field is mandatory, must be Alfanumerico (2), and can occur multiple times.
 
 - FR-3.13: The system shall collect a description (DESCRIZIONE) when "Other" (99) is selected for activation method. This field is mandatory when MODALITA = 99 and must be Alfanumerico (2000).
 
 #### 3.3.4 Contact Information (DettaglioOfferta/Contatti)
+
 - FR-3.14: The system shall collect contact details:
   - Phone number (TELEFONO) - Alfanumerico (15), mandatory
   - Vendor website (URL_SITO_VENDITORE) - Alfanumerico (100), mandatory if available
   - Offer URL (URL_OFFERTA) - Alfanumerico (100), mandatory if available
 
 #### 3.3.5 Energy Price References (RiferimentiPrezzoEnergia)
+
 - FR-3.15: The system shall collect price index information (IDX_PREZZO_ENERGIA) for variable offers. This section is mandatory only if TIPO_OFFERTA = 02 (Variable) and SCONTO/TIPOLOGIA is not 04 (if at least one discount is present). The field must be Numerico (2) with the following values for the index periodicity:
+
   - Quarterly:
     - PUN (01)
     - TTF (02)
@@ -141,18 +161,21 @@ No authentication or user management is required
     - PSV (14)
     - Psbil (15)
     - Other (99)
-  
+
   Note: Code '99' represents an index not managed by the Portal. The offer will be accepted by SII but will not be visible on the Offers Portal. The offer will become visible once SII implements the index; the User will be informed about the related timing. Reception of the offer alone makes the User compliant with the regulation.
 
 - FR-3.16: The system shall collect alternative index description (ALTRO) when "Other" (99) is selected for IDX_PREZZO_ENERGIA. This field is mandatory when IDX_PREZZO_ENERGIA = 99 and must be Alfanumerico (3000).
 
 #### 3.3.6 Offer Validity (ValiditaOfferta)
+
 - FR-3.17: The system shall collect validity start date (DATA_INIZIO) in timestamp format. This field is mandatory and must be in format GG/MM/AAAA_HH:MM:SS.
 
 - FR-3.18: The system shall collect validity end date (DATA_FINE) in timestamp format. This field is mandatory and must be in format GG/MM/AAAA_HH:MM:SS.
 
 #### 3.3.7 Offer Characteristics (CaratteristicheOfferta)
+
 - FR-3.19: The system shall collect consumption limits when applicable:
+
   - Minimum consumption (CONSUMO_MIN) - This field is mandatory if TIPO_OFFERTA = 03 (FLAT) and must be Numerico (9)
   - Maximum consumption (CONSUMO_MAX) - This field is mandatory if TIPO_OFFERTA = 03 (FLAT) and must be Numerico (9)
 
@@ -161,22 +184,26 @@ No authentication or user management is required
   - Maximum power (POTENZA_MAX) - This field is optional, must be Numerico (2,1) with decimal separator '.'
 
 #### 3.3.8 Dual Offer (OffertaDUAL)
+
 - FR-3.21: The system shall collect associated offer codes for Dual Fuel offers:
   - Electricity offer codes (OFFERTE_CONGIUNTE_EE) - This field is mandatory if TIPO_MERCATO = 03, must be Alfanumerico (32), can occur multiple times
   - Gas offer codes (OFFERTE_CONGIUNTE_GAS) - This field is mandatory if TIPO_MERCATO = 03, must be Alfanumerico (32), can occur multiple times
 
 #### 3.3.9 Payment Methods (MetodoPagamento)
+
 - FR-3.22: The system shall allow selection of multiple payment methods (MODALITA_PAGAMENTO):
+
   - Bank direct debit (01)
   - Postal direct debit (02)
   - Credit card direct debit (03)
   - Pre-filled bulletin (04)
   - Other (99)
-  This field is mandatory, must be Alfanumerico (2), and can occur multiple times.
+    This field is mandatory, must be Alfanumerico (2), and can occur multiple times.
 
 - FR-3.23: The system shall collect payment method description (DESCRIZIONE) when "Other" (99) is selected for MODALITA_PAGAMENTO. This field is mandatory when MODALITA_PAGAMENTO = 99 and must be Alfanumerico (25).
 
 #### 3.3.10 Regulated Components (ComponentiRegolate)
+
 - FR-3.24: The system shall allow selection of regulated components (CODICE) defined by the authority:
   - For Electricity (TIPO_MERCATO = 01):
     - PCV (01)
@@ -189,9 +216,10 @@ No authentication or user management is required
     - QTpsv (07)
     - QVD_fissa (09)
     - QVD_Variabile (10)
-  This field is optional, must be Alfanumerico (02), and can occur multiple times.
+      This field is optional, must be Alfanumerico (02), and can occur multiple times.
 
 #### 3.3.11 Price Type (TipoPrezzo)
+
 - FR-3.25: The system shall collect time band configuration (TIPOLOGIA_FASCE) for electricity offers. This section is mandatory if TIPO_MERCATO = 01 (Electricity) and TIPO_OFFERTA ≠ 03 (not FLAT). The field must be Alfanumerico (2) with the following values:
   - Monorario (01)
   - F1, F2 (02)
@@ -205,7 +233,9 @@ No authentication or user management is required
   - Biorario (F3 / F1+F2) (93)
 
 #### 3.3.12 Weekly Time Bands (FasceOrarieSettimanale)
+
 - FR-3.26: The system shall collect detailed weekly time bands when required. This section is mandatory if TIPOLOGIA_FASCE = 02 or 04 or 05 or 06, and includes:
+
   - Monday time bands (F_LUNEDI)
   - Tuesday time bands (F_MARTEDI)
   - Wednesday time bands (F_MERCOLEDI)
@@ -214,16 +244,18 @@ No authentication or user management is required
   - Saturday time bands (F_SABATO)
   - Sunday time bands (F_DOMENICA)
   - Holiday time bands (F_FESTIVITA)
-  
+
   Each field is mandatory, must be Alfanumerico (49), and follows the format:
   `XXI-YI,XXII-YII,..,XXN-YN` where:
+
   - XXi (numeric from 1 to 96): last quarter hour of application of the band
   - Yi (numeric from 1 to 8): number of the applied band (7:Peak , 8:OffPeak)
   - The following relations must always be verified:
     - XXi+1 > XXi
     - N <= 10
-  
+
   Example:
+
   ```
   F3: 00:01 - 07:00
   F2: 07:00 - 08:00
@@ -231,9 +263,11 @@ No authentication or user management is required
   F2: 19:00 - 23:00
   F3: 23:00 - 24:00
   ```
+
   becomes: `28-3,32-2,76-1,92-2,96-3`
 
 #### 3.3.13 Dispatching (Dispacciamento)
+
 - FR-3.27: The system shall collect dispatching component details for electricity offers. This section is mandatory if TIPO_MERCATO = 01 (Electricity), can occur multiple times, and includes:
   - Dispatching type (TIPO_DISPACCIAMENTO) - Mandatory, Numerico (2):
     - Disp. del.111/06 (01)
@@ -255,7 +289,9 @@ No authentication or user management is required
   - Component description (DESCRIZIONE) - Optional, Alfanumerico (255)
 
 #### 3.3.14 Company Components (ComponenteImpresa)
+
 - FR-3.28: The system shall allow addition of multiple company components. This section is optional, can occur multiple times, and includes:
+
   - Component name (NOME) - Mandatory, Alfanumerico (255)
   - Component description (DESCRIZIONE) - Mandatory, Alfanumerico (255)
   - Component type (TIPOLOGIA) - Mandatory, Alfanumerico (2):
@@ -269,6 +305,7 @@ No authentication or user management is required
     - Renewable energy / Green energy (06)
 
 - FR-3.29: The system shall allow addition of price intervals for each company component (ComponenteImpresa/IntervalloPrezzi). This section is mandatory, can occur multiple times, and includes:
+
   - Time band (FASCIA_COMPONENTE) - Optional, Alfanumerico (2):
     - Monorario/F1 (01)
     - F2 (02)
@@ -300,6 +337,7 @@ No authentication or user management is required
     - January (01) to December (12)
 
 #### 3.3.15 Contractual Conditions (CondizioniContrattuali)
+
 - FR-3.31: The system shall allow addition of multiple contractual conditions. This section is mandatory, can occur multiple times, and includes:
   - Condition type (TIPOLOGIA_CONDIZIONE) - Mandatory, Alfanumerico (2):
     - Activation (01)
@@ -315,13 +353,16 @@ No authentication or user management is required
     - No, it is not limiting (02)
 
 #### 3.3.16 Offer Zones (ZoneOfferta)
+
 - FR-3.32: The system shall allow specification of geographical availability. This section is optional and includes:
   - Regions (REGIONE) - Optional, Alfanumerico (2) where each code is Numerico (2), can occur multiple times
   - Provinces (PROVINCIA) - Optional, Alfanumerico (3) where each code is Numerico (3), can occur multiple times
   - Municipalities (COMUNE) - Optional, Alfanumerico (6) where each code is Numerico (6), can occur multiple times
 
 #### 3.3.17 Discounts (Sconto)
+
 - FR-3.33: The system shall allow addition of multiple discounts. This section is optional, can occur multiple times, and includes:
+
   - Discount name (NOME) - Mandatory, Alfanumerico (255)
   - Discount description (DESCRIZIONE) - Mandatory, Alfanumerico (3000)
   - Component/band code (CODICE_COMPONENTE_FASCIA) - Optional, Alfanumerico (02), can occur multiple times:
@@ -340,12 +381,14 @@ No authentication or user management is required
     - No (02)
 
 - FR-3.34: The system shall collect discount validity period (Sconto/PeriodoValidita). This section is optional and includes:
+
   - Duration in months (DURATA) - Optional, Numerico (2)
   - Valid until (VALIDO_FINO) - Optional, format MM/AAAA
   - Validity month (MESE_VALIDITA) - Optional, Numerico (2), can occur multiple times:
     - January (01) to December (12)
 
 - FR-3.35: The system shall collect discount application conditions (Sconto/Condizione). This section is mandatory for each discount and includes:
+
   - Application condition (CONDIZIONE_APPLICAZIONE) - Mandatory, Alfanumerico (2):
     - Not conditioned (00)
     - Electronic billing (01)
@@ -372,6 +415,7 @@ No authentication or user management is required
   - Price (PREZZO) - Mandatory, Numerico (6,6)
 
 #### 3.3.18 Additional Products and Services (ProdottiServiziAggiuntivi)
+
 - FR-3.37: The system shall allow addition of multiple additional products and services. This section is optional, can occur multiple times, and includes:
   - Product/service name (NOME) - Mandatory, Alfanumerico (255)
   - Product/service details (DETTAGLIO) - Mandatory, Alfanumerico (3000)
@@ -388,7 +432,9 @@ No authentication or user management is required
 ### 3.4 Validation
 
 #### 3.4.1 Field Validation
+
 - FR-4.1: The system shall validate all input fields according to the format and constraints specified in the SII document, including:
+
   - Field length validation
   - Data type validation (numeric, alphanumeric, date formats)
   - Valid value validation (for fields with enumerated values)
@@ -399,24 +445,28 @@ No authentication or user management is required
 - FR-4.3: The system shall prevent submission of forms with validation errors.
 
 #### 3.4.2 Conditional Validation
+
 - FR-4.4: The system shall enforce all conditional requirements based on selected options as detailed in sections 3.3.1 through 3.3.18, including:
+
   - Mandatory fields based on other field values
   - Field visibility based on other field values
   - Special format requirements based on field combinations
 
-- FR-4.5: The system shall validate repeatable sections (marked with * in the specification) to ensure they comply with minimum and maximum occurrence constraints.
+- FR-4.5: The system shall validate repeatable sections (marked with \* in the specification) to ensure they comply with minimum and maximum occurrence constraints.
 
 - FR-4.6: The system shall enforce the complex relationship rules between components, particularly:
-  
+
   For TIPO_MERCATO = 02 (Gas), a ComponenteImpresa/IntervalloPrezzi section is mandatory for each ComponenteImpresa inserted.
-  
+
   For TIPO_MERCATO = 01 (Electricity):
+
   - If MACROAREA (ComponenteImpresa) = 02, 04, or 06 and UNITA_MISURA (ComponenteImpresa/IntervalloPrezzi) = 03 (for all price intervals of the component), it is mandatory to insert a number of IntervalloPrezzi sections equal to the number of bands inserted in TIPOLOGIA_FASCE of the TipoPrezzo section.
   - If MACROAREA (ComponenteImpresa) = 01, 04, 05, or 06 and UNITA_MISURA (ComponenteImpresa/IntervalloPrezzi) = 01, 02, or 05, it is mandatory to insert a single IntervalloPrezzi for each "ComponentiImpresa" without populating the FASCIA_COMPONENTE field.
 
 ### 3.5 XML Generation
 
 #### 3.5.1 File Format
+
 - FR-5.1: The system shall generate XML files conforming to the SII specification version 4.5 (tracciato disponibile dal 01/12/2019 in sostituzione della precedente versione 01).
 
 - FR-5.2: The system shall use UTF-8 encoding for all XML files.
@@ -424,17 +474,19 @@ No authentication or user management is required
 - FR-5.3: The system shall include appropriate XML schema references.
 
 #### 3.5.2 File Naming
+
 - FR-5.4: The system shall name files according to the specified pattern:
-  - <PIVA_UTENTE>_<AZIONE>_<DESCRIZIONE>.XML
-  Where:
+  - <PIVA*UTENTE>*<AZIONE>\_<DESCRIZIONE>.XML
+    Where:
   - PIVA_UTENTE: VAT number of the accredited user
   - AZIONE: 'INSERIMENTO' for new offers, 'AGGIORNAMENTO' for updates
   - DESCRIZIONE: Free text field, maximum 25 alphanumeric characters (no spaces or underscores allowed)
 
 #### 3.5.3 XML Structure
+
 - FR-5.5: The system shall structure XML files with all required sections and fields as detailed in sections 3.3.1 through 3.3.18.
 
-- FR-5.6: The system shall handle repeatable sections (marked with * in the specification) appropriately, allowing multiple occurrences where permitted.
+- FR-5.6: The system shall handle repeatable sections (marked with \* in the specification) appropriately, allowing multiple occurrences where permitted.
 
 - FR-5.7: The system shall maintain proper nesting of XML elements according to the specification.
 
@@ -443,6 +495,7 @@ No authentication or user management is required
 ### 3.6 Output Management
 
 #### 3.6.1 Preview and Download
+
 - FR-6.1: The system shall provide a preview of the generated XML.
 
 - FR-6.2: The system shall allow users to download the generated XML file.
@@ -450,6 +503,7 @@ No authentication or user management is required
 - FR-6.3: The system shall allow users to save the XML file to their account for future reference.
 
 #### 3.6.2 Bulk Operations
+
 - FR-6.4: The system shall allow batch generation of multiple XML files.
 
 - FR-6.5: The system shall provide an option to download all generated files as a ZIP archive.
@@ -467,17 +521,20 @@ No authentication or user management is required
 ## 4. Non-Functional Requirements
 
 ### 4.1 Performance
+
 - NFR-1.1: The system shall load form pages within 2 seconds.
 - NFR-1.2: The system shall generate XML files within 5 seconds.
 - NFR-1.3: The system shall support concurrent use by multiple users.
 
 ### 4.2 Security
+
 - NFR-2.1: The system shall encrypt all sensitive data in transit and at rest.
 - NFR-2.2: The system shall implement secure authentication mechanisms.
 - NFR-2.3: The system shall implement proper access controls.
 - NFR-2.4: The system shall protect against common web vulnerabilities (OWASP Top 10).
 
 ### 4.3 Usability
+
 - NFR-3.1: The system shall provide a responsive interface accessible from different devices.
 - NFR-3.2: The system shall include inline help text and tooltips explaining field requirements.
 - NFR-3.3: The system shall provide clear error messages that guide users to fix issues.
@@ -488,23 +545,27 @@ No authentication or user management is required
   - Conditional field requirements
 
 ### 4.4 Reliability
+
 - NFR-4.1: The system shall be available 99.9% of the time.
 - NFR-4.2: The system shall implement backup and recovery mechanisms.
 - NFR-4.3: The system shall handle errors gracefully without data loss.
 
 ### 4.5 Compatibility
+
 - NFR-5.1: The system shall function properly on modern web browsers (Chrome, Firefox, Safari, Edge).
 - NFR-5.2: The system shall be compatible with desktop and tablet devices.
 
 ## 5. System Interfaces
 
 ### 5.1 User Interfaces
+
 - SI-1.1: The system shall provide a web-based user interface accessible via standard browsers.
 - SI-1.2: The system shall implement a responsive design that adapts to different screen sizes.
 - SI-1.3: The system shall provide clear visual indications of form progress and completion status.
 - SI-1.4: The system shall organize the complex form in a tabbed or wizard interface to manage the numerous fields and sections effectively.
 
 ### 5.2 External Interfaces
+
 - SI-2.1: The system shall export data in XML format compliant with SII specifications version 4.5.
 - SI-2.2: The system shall optionally integrate with the SII portal for direct submission (future enhancement).
 
@@ -520,6 +581,7 @@ No authentication or user management is required
 ## 7. Appendices
 
 ### 7.1 XML File Structure
+
 The generated XML files shall conform to the structure defined in "Trasmissione Offerte" version 4.5, with all required sections and fields. The primary sections include:
 
 1. Identificativi Offerta (Offer Identifiers)
@@ -542,15 +604,19 @@ The generated XML files shall conform to the structure defined in "Trasmissione 
 18. ProdottiServiziAggiuntivi (Additional Products and Services)
 
 ### 7.2 File Naming Convention
+
 File names shall follow the pattern:
-- <PIVA_UTENTE>_<AZIONE>_<DESCRIZIONE>.XML
+
+- <PIVA*UTENTE>*<AZIONE>\_<DESCRIZIONE>.XML
 
 Where:
+
 - PIVA_UTENTE: VAT number of the accredited user
 - AZIONE: Action to perform (INSERIMENTO for new offers, AGGIORNAMENTO for updates)
 - DESCRIZIONE: Free text field, maximum 25 alphanumeric characters (no spaces or underscores)
 
 ### 7.3 Special Notes
+
 1. For price interval consumption ranges, the price is calculated by steps. If two ranges are defined (0-100 with price X and 101-200 with price Y) and consumption is 150, then the price is calculated as 100*X + 50*Y.
 
 2. The code '99' for IDX_PREZZO_ENERGIA represents an index not managed by the Portal. The offer will be accepted by SII but not visible on the Offers Portal until SII implements the index.

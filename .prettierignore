@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build output
+.next/
+out/
+dist/
+
+# Environment files
+.env*
+
+# Git
+.git/
+
+# Next.js
+next-env.d.ts
+
+# Generated files
+*.generated.ts
+*.generated.js 
