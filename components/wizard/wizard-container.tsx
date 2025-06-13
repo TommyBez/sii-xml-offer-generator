@@ -1,12 +1,22 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useWizardStore, type WizardFormData } from '@/store/wizard-store';
 import { getVisibleSteps, isStepAccessible } from '@/lib/wizard-config';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Save } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { AlertCircle, Save, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation';
 import { WizardStepContent } from './wizard-step-content';
@@ -61,6 +71,7 @@ const getDefaultFormValues = (existingData: Partial<WizardFormData>): Partial<Wi
 
 export function WizardContainer() {
   const { toast } = useToast();
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const {
     currentStep,
     formData,
@@ -71,6 +82,7 @@ export function WizardContainer() {
     markStepCompleted,
     saveDraft,
     canNavigateToStep,
+    resetWizard,
   } = useWizardStore();
 
   // Get visible steps based on form data
@@ -199,6 +211,18 @@ export function WizardContainer() {
     });
   }, [saveDraft, toast]);
 
+  // Handle reset
+  const handleReset = useCallback(() => {
+    resetWizard();
+    methods.reset(getDefaultFormValues({}));
+    hasRestoredRef.current = false;
+    setShowResetDialog(false);
+    toast({
+      title: 'Data reset',
+      description: 'All form data has been cleared.',
+    });
+  }, [resetWizard, methods, toast]);
+
   // Handle browser navigation warnings
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -263,6 +287,15 @@ export function WizardContainer() {
                     Save Draft
                   </Button>
                 )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowResetDialog(true)}
+                  className="gap-2 text-destructive hover:text-destructive"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Reset
+                </Button>
               </div>
             </div>
           </div>
@@ -289,6 +322,28 @@ export function WizardContainer() {
           isLastStep={currentStep === visibleSteps.length - 1}
           className="border-t"
         />
+
+        {/* Reset confirmation dialog */}
+        <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Reset all data?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action will clear all your progress and cannot be undone. 
+                All form data, completed steps, and saved drafts will be permanently deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleReset}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Reset All Data
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </FormProvider>
   );
