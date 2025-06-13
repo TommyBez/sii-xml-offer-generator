@@ -47,8 +47,8 @@ export function WizardStepContent({ step, onSubmit }: WizardStepContentProps) {
       return formComponents[componentName];
     }
     
-    // Fall back to placeholder for unimplemented forms
-    return FormPlaceholder;
+    // Return null to render placeholder later
+    return null;
   }, [step.component]);
 
   return (
@@ -58,18 +58,22 @@ export function WizardStepContent({ step, onSubmit }: WizardStepContentProps) {
         <CardDescription>{step.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Suspense
-          fallback={
-            <div className="space-y-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-20 w-full" />
-            </div>
-          }
-        >
-          <FormComponent step={step} onSubmit={onSubmit} />
-        </Suspense>
+        {FormComponent ? (
+          <Suspense
+            fallback={
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+            }
+          >
+            <FormComponent onSubmit={onSubmit} />
+          </Suspense>
+        ) : (
+          <FormPlaceholder step={step} onSubmit={onSubmit} />
+        )}
       </CardContent>
     </Card>
   );

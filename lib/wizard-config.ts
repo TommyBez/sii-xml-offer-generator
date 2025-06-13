@@ -28,6 +28,14 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'offer-details',
+    title: 'Offer Details',
+    description: 'Configure market type, client type, and other offer specifications',
+    component: 'OfferDetailsForm',
+    validation: 'offerDetailsSchema',
+    dependsOn: ['identification'],
+  },
+  {
     id: 'issuer-details',
     title: 'Issuer Details',
     description: 'Company information for the offer issuer',

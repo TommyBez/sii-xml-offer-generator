@@ -59,9 +59,75 @@ export const wizardStepSchema = z.object({
   isCompleted: z.boolean(),
 });
 
+// Offer Details validation schema
+export const offerDetailsSchema = z
+  .object({
+    TIPO_MERCATO: z.enum(["01", "02", "03"], {
+      required_error: "Market type is required",
+    }),
+    OFFERTA_SINGOLA: z.enum(["SI", "NO"]).optional(),
+    TIPO_CLIENTE: z.string({
+      required_error: "Client type is required",
+    }),
+    DOMESTICO_RESIDENTE: z.string().optional(),
+    TIPO_OFFERTA: z.enum(["01", "02", "03"], {
+      required_error: "Offer type is required",
+    }),
+    TIPOLOGIA_ATT_CONTR: z
+      .array(z.string())
+      .min(1, "At least one contract activation type is required"),
+    NOME_OFFERTA: z
+      .string()
+      .min(1, "Offer name is required")
+      .max(255, "Maximum 255 characters allowed")
+      .regex(/^[a-zA-Z0-9\s\-_\.]+$/, "Only alphanumeric characters, spaces, hyphens, underscores, and dots allowed"),
+    DESCRIZIONE: z
+      .string()
+      .max(3000, "Maximum 3000 characters allowed"),
+    DURATA: z
+      .number()
+      .int()
+      .min(-1, "Duration must be -1 (indeterminate) or between 1-99")
+      .max(99, "Duration must be -1 (indeterminate) or between 1-99")
+      .refine((val) => val === -1 || val >= 1, {
+        message: "Duration must be -1 (indeterminate) or between 1-99",
+      }),
+    GARANZIE: z
+      .string()
+      .max(3000, "Maximum 3000 characters allowed")
+      .default("NO"),
+  })
+  .refine(
+    (data) => {
+      // Single offer required for non-dual fuel offers
+      if (data.TIPO_MERCATO !== "03" && !data.OFFERTA_SINGOLA) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Single offer selection required for non-dual fuel offers",
+      path: ["OFFERTA_SINGOLA"],
+    }
+  )
+  .refine(
+    (data) => {
+      // Residential condominium only available for gas
+      if (data.TIPO_CLIENTE === "03" && data.TIPO_MERCATO !== "02") {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Residential condominium is only available for gas market",
+      path: ["TIPO_CLIENTE"],
+    }
+  );
+
 // Type exports from schemas
 export type IdentificationData = z.infer<typeof identificationSchema>;
 export type Company = z.infer<typeof companySchema>;
 export type OfferItem = z.infer<typeof offerItemSchema>;
 export type Offer = z.infer<typeof offerSchema>;
 export type WizardStep = z.infer<typeof wizardStepSchema>;
+export type OfferDetailsData = z.infer<typeof offerDetailsSchema>;
