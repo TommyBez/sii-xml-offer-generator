@@ -115,7 +115,7 @@ export function ActivationMethodsForm({ initialData, onSubmit }: ActivationMetho
                           >
                             <FormControl>
                               <Checkbox
-                                checked={field.value?.includes(option.value)}
+                                checked={field.value?.includes(option.value as "01" | "02" | "03" | "04" | "05" | "99")}
                                 onCheckedChange={(checked) => {
                                   const currentValues = field.value || [];
                                   const newValues = checked
