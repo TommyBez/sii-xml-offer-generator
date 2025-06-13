@@ -1,0 +1,181 @@
+[
+  {
+    "id": "T01",
+    "title": "Project Scaffolding & Tech Stack Setup",
+    "description": "Initialize repository structure, choose frontend and backend frameworks, configure linting, formatting, and CI pipeline."
+  },
+  {
+    "id": "T02",
+    "title": "Form Wizard Framework",
+    "description": "Implement the core multi-step/wizard UI that will host all data-collection forms, with state management and navigation logic.",
+    "dependencies": ["T01"]
+  },
+  {
+    "id": "T03",
+    "title": "Identification Information Form (FR-3.1)",
+    "description": "Create UI and local validation for PIVA_UTENTE and COD_OFFERTA fields.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T04",
+    "title": "Offer Details Form (FR-3.2 – 3.11)",
+    "description": "Build UI to collect TIPO_MERCATO, OFFERTA_SINGOLA, TIPO_CLIENTE, DOMESTICO_RESIDENTE, TIPO_OFFERTA, TIPOLOGIA_ATT_CONTR, NOME_OFFERTA, DESCRIZIONE, DURATA, GARANZIE with conditional visibility rules.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T05",
+    "title": "Activation Methods Form (FR-3.12 – 3.13)",
+    "description": "Build UI for DettaglioOfferta.ModalitaAttivazione section with multi-select MODALITA and conditional DESCRIZIONE field.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T06",
+    "title": "Contact Information Form (FR-3.14)",
+    "description": "Create UI for phone, vendor site URL, and offer URL fields with validation.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T07",
+    "title": "Energy Price References Form (FR-3.15 – 3.16)",
+    "description": "Implement IDX_PREZZO_ENERGIA selection and ALTRO conditional field.",
+    "dependencies": ["T04"]
+  },
+  {
+    "id": "T08",
+    "title": "Offer Validity Form (FR-3.17 – 3.18)",
+    "description": "Collect DATA_INIZIO and DATA_FINE timestamps with date-time picker and format enforcement.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T09",
+    "title": "Offer Characteristics Form (FR-3.19 – 3.20)",
+    "description": "Handle CONSUMO and POTENZA limits with FLAT-offer conditional rules.",
+    "dependencies": ["T04"]
+  },
+  {
+    "id": "T10",
+    "title": "Dual Offer Form (FR-3.21)",
+    "description": "Collect associated offer codes for Dual Fuel offers.",
+    "dependencies": ["T04"]
+  },
+  {
+    "id": "T11",
+    "title": "Payment Methods Form (FR-3.22 – 3.23)",
+    "description": "Multi-select payment methods with conditional DESCRIZIONE field for 'Other'.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T12",
+    "title": "Regulated Components Form (FR-3.24)",
+    "description": "Optional multi-select component codes based on commodity.",
+    "dependencies": ["T04"]
+  },
+  {
+    "id": "T13",
+    "title": "Price Type & Time Bands Forms (FR-3.25 – 3.27)",
+    "description": "Implement TIPOLOGIA_FASCE selection, weekly band detail entry, and dispatching components UI.",
+    "dependencies": ["T04"]
+  },
+  {
+    "id": "T14",
+    "title": "Company Components & Price Intervals Form (FR-3.28 – 3.30)",
+    "description": "Nested UI for ComponenteImpresa, IntervalloPrezzi, and PeriodoValidita with dynamic add/remove capability.",
+    "dependencies": ["T04"]
+  },
+  {
+    "id": "T15",
+    "title": "Contractual Conditions Form (FR-3.31)",
+    "description": "Support multiple CondizioniContrattuali with conditional fields and limiting flag.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T16",
+    "title": "Offer Zones Form (FR-3.32)",
+    "description": "UI to specify geographical availability via regions, provinces, municipalities.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T17",
+    "title": "Discounts Form (FR-3.33 – 3.36)",
+    "description": "Complex nested UI for Sconto, PeriodoValidita, Condizione, and PREZZISconto sections with repeatable entries.",
+    "dependencies": ["T04"]
+  },
+  {
+    "id": "T18",
+    "title": "Additional Products & Services Form (FR-3.37)",
+    "description": "Collect optional additional products/services with macro-area handling.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T19",
+    "title": "Comprehensive Field Validation Layer (FR-4.x)",
+    "description": "Implement synchronous & cross-field validation per SII rules including conditional and repeatable section constraints.",
+    "dependencies": ["T03","T04","T05","T06","T07","T08","T09","T10","T11","T12","T13","T14","T15","T16","T17","T18"]
+  },
+  {
+    "id": "T20",
+    "title": "XML Schema Definition Integration",
+    "description": "Load provided XSD and set up automatic XML validation utilities.",
+    "dependencies": ["T01"]
+  },
+  {
+    "id": "T21",
+    "title": "XML Generation Engine (FR-5.x)",
+    "description": "Transform validated form data into compliant XML structure with schema references and correct file naming.",
+    "dependencies": ["T19","T20"]
+  },
+  {
+    "id": "T22",
+    "title": "XML Preview Component (FR-6.1)",
+    "description": "Render generated XML in a syntax-highlighted viewer before download.",
+    "dependencies": ["T21"]
+  },
+  {
+    "id": "T23",
+    "title": "Download & Compression Module (FR-6.2 – 6.6)",
+    "description": "Allow users to download single XML or bulk ZIP archive, with optional compression handling.",
+    "dependencies": ["T21"]
+  },
+  {
+    "id": "T24",
+    "title": "Generation History & Logging (FR-7.x)",
+    "description": "Persist generation logs with timestamps and offer change audit trail.",
+    "dependencies": ["T21"]
+  },
+  {
+    "id": "T25",
+    "title": "Performance Optimization (NFR-1.x)",
+    "description": "Ensure form loading <2s and XML generation <5s via lazy loading, memoization, and efficient algorithms.",
+    "dependencies": ["T22","T23"]
+  },
+  {
+    "id": "T26",
+    "title": "Security Hardening (NFR-2.x)",
+    "description": "Implement HTTPS, input sanitization, secure headers, and protection against OWASP Top 10.",
+    "dependencies": ["T01"]
+  },
+  {
+    "id": "T27",
+    "title": "Responsive & Usability Enhancements (NFR-3.x)",
+    "description": "Apply responsive layout, inline help, auto-save, and contextual tooltips across the wizard.",
+    "dependencies": ["T03","T04","T05","T06","T07","T08","T09","T10","T11","T12","T13","T14","T15","T16","T17","T18"]
+  },
+  {
+    "id": "T28",
+    "title": "Reliability & Backup Strategy (NFR-4.x)",
+    "description": "Set up availability monitoring, error handling, and automated backups.",
+    "dependencies": ["T24"]
+  },
+  {
+    "id": "T29",
+    "title": "Browser Compatibility Testing (NFR-5.x)",
+    "description": "Test and fix issues across Chrome, Firefox, Safari, and Edge on desktop & tablet.",
+    "dependencies": ["T27"]
+  },
+  {
+    "id": "T30",
+    "title": "Future Enhancement Stubs",
+    "description": "Create extensible architecture hooks for direct SII submission, template library, and analytics modules.",
+    "dependencies": ["T21","T24"]
+  }
+] 
