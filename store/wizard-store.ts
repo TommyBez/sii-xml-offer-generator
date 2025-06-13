@@ -4,6 +4,10 @@ import { devtools } from 'zustand/middleware';
 
 // Type for wizard form data structure
 export interface WizardFormData {
+  identification?: {
+    PIVA_UTENTE?: string;
+    COD_OFFERTA?: string;
+  };
   offerNumber?: string;
   date?: Date;
   validUntil?: Date;
@@ -197,7 +201,10 @@ export const useWizardStore = create<WizardState & WizardActions>()(
           // Can always go back to previous steps
           if (step < state.currentStep) return true;
           
-          // Can only go forward if all previous steps are completed
+          // Can navigate to the next immediate step (to allow completion of current step)
+          if (step === state.currentStep + 1) return true;
+          
+          // For steps beyond the next one, check if all previous steps are completed
           for (let i = 0; i < step; i++) {
             if (!state.completedSteps.has(i)) return false;
           }

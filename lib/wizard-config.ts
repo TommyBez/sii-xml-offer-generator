@@ -13,11 +13,19 @@ export interface WizardStepConfig {
 
 export const wizardSteps: WizardStepConfig[] = [
   {
+    id: 'identification',
+    title: 'Identification Information',
+    description: 'Enter VAT number and offer code',
+    component: 'IdentificationForm',
+    validation: 'identificationSchema',
+  },
+  {
     id: 'offer-basic',
     title: 'Basic Information',
     description: 'Enter basic offer details',
     component: 'OfferBasicForm',
     validation: 'offerBasicSchema',
+    dependsOn: ['identification'],
   },
   {
     id: 'issuer-details',
@@ -144,7 +152,7 @@ export const wizardSteps: WizardStepConfig[] = [
     title: 'Summary & Review',
     description: 'Review all offer details before finalizing',
     component: 'SummaryReviewForm',
-    dependsOn: ['offer-basic', 'issuer-details', 'recipient-details'],
+    dependsOn: ['identification', 'offer-basic', 'issuer-details', 'recipient-details'],
   },
 ];
 

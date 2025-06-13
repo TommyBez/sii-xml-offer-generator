@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+// Identification validation schema
+export const identificationSchema = z.object({
+  PIVA_UTENTE: z
+    .string()
+    .length(16, "VAT number must be exactly 16 characters")
+    .regex(/^[A-Z0-9]+$/, "Only alphanumeric characters allowed"),
+  COD_OFFERTA: z
+    .string()
+    .min(1, "Offer code is required")
+    .max(32, "Maximum 32 characters allowed")
+    .regex(/^[A-Z0-9]+$/, "Only alphanumeric characters allowed"),
+});
+
 // Company validation schema
 export const companySchema = z.object({
   id: z.string().uuid(),
@@ -47,6 +60,7 @@ export const wizardStepSchema = z.object({
 });
 
 // Type exports from schemas
+export type IdentificationData = z.infer<typeof identificationSchema>;
 export type Company = z.infer<typeof companySchema>;
 export type OfferItem = z.infer<typeof offerItemSchema>;
 export type Offer = z.infer<typeof offerSchema>;

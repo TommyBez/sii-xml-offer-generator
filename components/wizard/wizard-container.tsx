@@ -18,6 +18,11 @@ const getDefaultFormValues = (existingData: Partial<WizardFormData>): Partial<Wi
   const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
   
   return {
+    identification: {
+      PIVA_UTENTE: '',
+      COD_OFFERTA: '',
+      ...existingData.identification,
+    },
     offerNumber: existingData.offerNumber || '',
     date: existingData.date || today,
     validUntil: existingData.validUntil || thirtyDaysFromNow,
