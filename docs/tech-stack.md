@@ -17,7 +17,7 @@ This document describes the technology stack adopted (and proposed) for the **SI
 | UI Library | **React 19** | Already in `package.json`. Gives concurrent features and hooks-based API. |
 | Language | **TypeScript 5** | Already configured via `tsconfig.json`. Guarantees strict typing for the complex domain models. |
 | Styling | **Tailwind CSS 4** (with PostCSS) | Already configured (`postcss.config.mjs`). Fast utility-first styling, good for responsive wizard forms. |
-| Icons & UI Primitives | **Radix UI** (react-aria compliant) + **Heroicons** *(to be added)* | Accessible form components out of the box. |
+| Icons & UI Primitives | **Shadcn/ui** (already scaffolded under `components/ui`) + **lucid-react** *(icon set)* | Accessible, theme-able components built on top of Tailwind CSS, fully customizable in-repo. |
 | Font | **next/font** with Geist | Default from create-next-app. |
 
 ## 3. Form Handling & Validation
