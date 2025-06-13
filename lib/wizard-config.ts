@@ -44,6 +44,14 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'contact-information',
+    title: 'Contact Information',
+    description: 'Customer service phone number and relevant URLs',
+    component: 'ContactInformationForm',
+    validation: 'contactInformationSchema',
+    dependsOn: ['identification'],
+  },
+  {
     id: 'issuer-details',
     title: 'Issuer Details',
     description: 'Company information for the offer issuer',
