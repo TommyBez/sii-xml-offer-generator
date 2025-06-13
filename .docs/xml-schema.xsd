@@ -1,0 +1,863 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <!-- Root element -->
+    <xs:element name="Offerta">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- Mandatory sections -->
+                <xs:element name="IdentificativiOfferta" type="IdentificativiOffertaType"/>
+                <xs:element name="DettaglioOfferta" type="DettaglioOffertaType"/>
+                <xs:element name="DettaglioOfferta.ModalitaAttivazione" type="ModalitaAttivazioneType"/>
+                <xs:element name="DettaglioOfferta.Contatti" type="ContattiType"/>
+                <xs:element name="ValiditaOfferta" type="ValiditaOffertaType"/>
+                <xs:element name="MetodoPagamento" type="MetodoPagamentoType" maxOccurs="unbounded"/>
+                
+                <!-- Optional sections -->
+                <xs:element name="RiferimentiPrezzoEnergia" type="RiferimentiPrezzoEnergiaType" minOccurs="0"/>
+                <xs:element name="CaratteristicheOfferta" type="CaratteristicheOffertaType" minOccurs="0"/>
+                <xs:element name="OffertaDUAL" type="OffertaDUALType" minOccurs="0"/>
+                <xs:element name="ComponentiRegolate" type="ComponentiRegolateType" minOccurs="0"/>
+                <xs:element name="TipoPrezzo" type="TipoPrezzoType" minOccurs="0"/>
+                <xs:element name="FasceOrarieSettimanale" type="FasceOrarieSettimanaleType" minOccurs="0"/>
+                <xs:element name="Dispacciamento" type="DispacciamentoType" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="ComponenteImpresa" type="ComponenteImpresaType" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="CondizioniContrattuali" type="CondizioniContrattualiType" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="ZoneOfferta" type="ZoneOffertaType" minOccurs="0"/>
+                <xs:element name="Sconto" type="ScontoType" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="ProdottiServiziAggiuntivi" type="ProdottiServiziAggiuntiviType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- IdentificativiOfferta section -->
+    <xs:complexType name="IdentificativiOffertaType">
+        <xs:sequence>
+            <xs:element name="PIVA_UTENTE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="16"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="COD_OFFERTA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="32"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- DettaglioOfferta section -->
+    <xs:complexType name="DettaglioOffertaType">
+        <xs:sequence>
+            <xs:element name="TIPO_MERCATO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Elettrico -->
+                        <xs:enumeration value="02"/> <!-- Gas -->
+                        <xs:enumeration value="03"/> <!-- Dual Fuel -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="OFFERTA_SINGOLA" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="SI"/>
+                        <xs:enumeration value="NO"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="TIPO_CLIENTE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Domestico -->
+                        <xs:enumeration value="02"/> <!-- Altri Usi -->
+                        <xs:enumeration value="03"/> <!-- Condominio Uso Domestico (Gas) -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DOMESTICO_RESIDENTE" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Domestico Residente -->
+                        <xs:enumeration value="02"/> <!-- Domestico NON Residente -->
+                        <xs:enumeration value="03"/> <!-- Tutte -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="TIPO_OFFERTA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Fisso -->
+                        <xs:enumeration value="02"/> <!-- Variabile -->
+                        <xs:enumeration value="03"/> <!-- FLAT -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="TIPOLOGIA_ATT_CONTR" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Cambio Fornitore -->
+                        <xs:enumeration value="02"/> <!-- Prima Attivazione -->
+                        <xs:enumeration value="03"/> <!-- Riattivazione -->
+                        <xs:enumeration value="04"/> <!-- Voltura -->
+                        <xs:enumeration value="99"/> <!-- Sempre -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="NOME_OFFERTA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="255"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DESCRIZIONE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="3000"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DURATA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="-1"/>
+                        <xs:maxInclusive value="99"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="GARANZIE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="3000"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ModalitaAttivazione section -->
+    <xs:complexType name="ModalitaAttivazioneType">
+        <xs:sequence>
+            <xs:element name="MODALITA" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Offerta attivabile solo da web -->
+                        <xs:enumeration value="02"/> <!-- Offerta attivabile da qualsiasi canale -->
+                        <xs:enumeration value="03"/> <!-- Presso punto vendita -->
+                        <xs:enumeration value="04"/> <!-- Teleselling -->
+                        <xs:enumeration value="05"/> <!-- Agenzia -->
+                        <xs:enumeration value="99"/> <!-- Altro -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DESCRIZIONE" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="2000"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Contatti section -->
+    <xs:complexType name="ContattiType">
+        <xs:sequence>
+            <xs:element name="TELEFONO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="15"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="URL_SITO_VENDITORE" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="100"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="URL_OFFERTA" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="100"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- RiferimentiPrezzoEnergia section -->
+    <xs:complexType name="RiferimentiPrezzoEnergiaType">
+        <xs:sequence>
+            <xs:element name="IDX_PREZZO_ENERGIA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- PUN trimestrale -->
+                        <xs:enumeration value="02"/> <!-- TTF trimestrale -->
+                        <xs:enumeration value="03"/> <!-- PSV trimestrale -->
+                        <xs:enumeration value="04"/> <!-- Psbil trimestrale -->
+                        <xs:enumeration value="05"/> <!-- PE trimestrale -->
+                        <xs:enumeration value="06"/> <!-- Cmem trimestrale -->
+                        <xs:enumeration value="07"/> <!-- Pfor trimestrale -->
+                        <xs:enumeration value="08"/> <!-- PUN bimestrale -->
+                        <xs:enumeration value="09"/> <!-- TTF bimestrale -->
+                        <xs:enumeration value="10"/> <!-- PSV bimestrale -->
+                        <xs:enumeration value="11"/> <!-- Psbil bimestrale -->
+                        <xs:enumeration value="12"/> <!-- PUN mensile -->
+                        <xs:enumeration value="13"/> <!-- TTF mensile -->
+                        <xs:enumeration value="14"/> <!-- PSV mensile -->
+                        <xs:enumeration value="15"/> <!-- Psbil mensile -->
+                        <xs:enumeration value="99"/> <!-- Altro -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="ALTRO" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="3000"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ValiditaOfferta section -->
+    <xs:complexType name="ValiditaOffertaType">
+        <xs:sequence>
+            <xs:element name="DATA_INIZIO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="\d{2}/\d{2}/\d{4}_\d{2}:\d{2}:\d{2}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DATA_FINE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="\d{2}/\d{2}/\d{4}_\d{2}:\d{2}:\d{2}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- CaratteristicheOfferta section -->
+    <xs:complexType name="CaratteristicheOffertaType">
+        <xs:sequence>
+            <xs:element name="CONSUMO_MIN" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:totalDigits value="9"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="CONSUMO_MAX" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:totalDigits value="9"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="POTENZA_MIN" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:fractionDigits value="1"/>
+                        <xs:totalDigits value="3"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="POTENZA_MAX" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:fractionDigits value="1"/>
+                        <xs:totalDigits value="3"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- OffertaDUAL section -->
+    <xs:complexType name="OffertaDUALType">
+        <xs:sequence>
+            <xs:element name="OFFERTE_CONGIUNTE_EE" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="32"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="OFFERTE_CONGIUNTE_GAS" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="32"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- MetodoPagamento section -->
+    <xs:complexType name="MetodoPagamentoType">
+        <xs:sequence>
+            <xs:element name="MODALITA_PAGAMENTO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Domiciliazione bancaria -->
+                        <xs:enumeration value="02"/> <!-- Domiciliazione postale -->
+                        <xs:enumeration value="03"/> <!-- Domiciliazione su carta di credito -->
+                        <xs:enumeration value="04"/> <!-- Bollettino precompilato -->
+                        <xs:enumeration value="99"/> <!-- Altro -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DESCRIZIONE" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="25"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ComponentiRegolate section -->
+    <xs:complexType name="ComponentiRegolateType">
+        <xs:sequence>
+            <xs:element name="CODICE" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- PCV -->
+                        <xs:enumeration value="02"/> <!-- PPE -->
+                        <xs:enumeration value="03"/> <!-- CCR -->
+                        <xs:enumeration value="04"/> <!-- CPR -->
+                        <xs:enumeration value="05"/> <!-- GRAD -->
+                        <xs:enumeration value="06"/> <!-- QTint -->
+                        <xs:enumeration value="07"/> <!-- QTpsv -->
+                        <xs:enumeration value="09"/> <!-- QVD_fissa -->
+                        <xs:enumeration value="10"/> <!-- QVD_Variabile -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- TipoPrezzo section -->
+    <xs:complexType name="TipoPrezzoType">
+        <xs:sequence>
+            <xs:element name="TIPOLOGIA_FASCE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- monorario -->
+                        <xs:enumeration value="02"/> <!-- F1, F2 -->
+                        <xs:enumeration value="03"/> <!-- F1, F2, F3 -->
+                        <xs:enumeration value="04"/> <!-- F1, F2, F3, F4 -->
+                        <xs:enumeration value="05"/> <!-- F1, F2, F3, F4, F5 -->
+                        <xs:enumeration value="06"/> <!-- F1, F2, F3, F4, F5, F6 -->
+                        <xs:enumeration value="07"/> <!-- Peak/OffPeak -->
+                        <xs:enumeration value="91"/> <!-- biorario (F1 / F2+F3) -->
+                        <xs:enumeration value="92"/> <!-- biorario (F2 / F1+F3) -->
+                        <xs:enumeration value="93"/> <!-- biorario (F3 / F1+F2) -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- FasceOrarieSettimanale section -->
+    <xs:complexType name="FasceOrarieSettimanaleType">
+        <xs:sequence>
+            <xs:element name="F_LUNEDI">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="49"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="F_MARTEDI">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="49"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="F_MERCOLEDI">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="49"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="F_GIOVEDI">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="49"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="F_VENERDI">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="49"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="F_SABATO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="49"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="F_DOMENICA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="49"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="F_FESTIVITA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="49"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Dispacciamento section -->
+    <xs:complexType name="DispacciamentoType">
+        <xs:sequence>
+            <xs:element name="TIPO_DISPACCIAMENTO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Disp. del.111/06 -->
+                        <xs:enumeration value="02"/> <!-- PD -->
+                        <xs:enumeration value="03"/> <!-- MSD -->
+                        <xs:enumeration value="04"/> <!-- Modulazione Eolico -->
+                        <xs:enumeration value="05"/> <!-- Unità essenziali -->
+                        <xs:enumeration value="06"/> <!-- Funz. Terna -->
+                        <xs:enumeration value="07"/> <!-- Capacità Produttiva -->
+                        <xs:enumeration value="08"/> <!-- Interrompibilità -->
+                        <xs:enumeration value="09"/> <!-- Corrispettivo Capacità di Mercato STG -->
+                        <xs:enumeration value="10"/> <!-- Corrispettivo capacità di mercato MT -->
+                        <xs:enumeration value="11"/> <!-- Reintegrazione oneri salvaguardia -->
+                        <xs:enumeration value="12"/> <!-- Reintegrazione oneri tutele graduali -->
+                        <xs:enumeration value="13"/> <!-- DispBT -->
+                        <xs:enumeration value="99"/> <!-- Altro -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="VALORE_DISP" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:fractionDigits value="6"/>
+                        <xs:totalDigits value="7"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="NOME">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="25"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DESCRIZIONE" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="255"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ComponenteImpresa section -->
+    <xs:complexType name="ComponenteImpresaType">
+        <xs:sequence>
+            <xs:element name="NOME">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="255"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DESCRIZIONE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="255"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="TIPOLOGIA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- STANDARD -->
+                        <xs:enumeration value="02"/> <!-- OPZIONALE -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="MACROAREA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Commercializzazione quota fissa -->
+                        <xs:enumeration value="02"/> <!-- Commercializzazione quota energia -->
+                        <xs:enumeration value="04"/> <!-- Prezzo quota energia -->
+                        <xs:enumeration value="05"/> <!-- Una Tantum -->
+                        <xs:enumeration value="06"/> <!-- FER/Energia Verde -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="IntervalloPrezzi" type="IntervalloPrezziType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- IntervalloPrezzi section -->
+    <xs:complexType name="IntervalloPrezziType">
+        <xs:sequence>
+            <xs:element name="FASCIA_COMPONENTE" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- monorario/F1 -->
+                        <xs:enumeration value="02"/> <!-- F2 -->
+                        <xs:enumeration value="03"/> <!-- F3 -->
+                        <xs:enumeration value="04"/> <!-- F4 -->
+                        <xs:enumeration value="05"/> <!-- F5 -->
+                        <xs:enumeration value="06"/> <!-- F6 -->
+                        <xs:enumeration value="07"/> <!-- Peak -->
+                        <xs:enumeration value="08"/> <!-- OffPeak -->
+                        <xs:enumeration value="91"/> <!-- F2+F3 -->
+                        <xs:enumeration value="92"/> <!-- F1+F3 -->
+                        <xs:enumeration value="93"/> <!-- F1+F2 -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="CONSUMO_DA" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:totalDigits value="9"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="CONSUMO_A" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:totalDigits value="9"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="PREZZO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:fractionDigits value="6"/>
+                        <xs:totalDigits value="12"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="UNITA_MISURA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- €Anno -->
+                        <xs:enumeration value="02"/> <!-- €kW -->
+                        <xs:enumeration value="03"/> <!-- €kWh -->
+                        <xs:enumeration value="04"/> <!-- €Sm3 -->
+                        <xs:enumeration value="05"/> <!-- € -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="PeriodoValidita" type="PeriodoValiditaType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- PeriodoValidita section -->
+    <xs:complexType name="PeriodoValiditaType">
+        <xs:sequence>
+            <xs:element name="DURATA" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:totalDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="VALIDO_FINO" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="\d{2}/\d{4}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="MESE_VALIDITA" minOccurs="0" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Gennaio -->
+                        <xs:enumeration value="02"/> <!-- Febbraio -->
+                        <xs:enumeration value="03"/> <!-- Marzo -->
+                        <xs:enumeration value="04"/> <!-- Aprile -->
+                        <xs:enumeration value="05"/> <!-- Maggio -->
+                        <xs:enumeration value="06"/> <!-- Giugno -->
+                        <xs:enumeration value="07"/> <!-- Luglio -->
+                        <xs:enumeration value="08"/> <!-- Agosto -->
+                        <xs:enumeration value="09"/> <!-- Settembre -->
+                        <xs:enumeration value="10"/> <!-- Ottobre -->
+                        <xs:enumeration value="11"/> <!-- Novembre -->
+                        <xs:enumeration value="12"/> <!-- Dicembre -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- CondizioniContrattuali section -->
+    <xs:complexType name="CondizioniContrattualiType">
+        <xs:sequence>
+            <xs:element name="TIPOLOGIA_CONDIZIONE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Attivazione -->
+                        <xs:enumeration value="02"/> <!-- Disattivazione -->
+                        <xs:enumeration value="03"/> <!-- Recesso -->
+                        <xs:enumeration value="04"/> <!-- Offerta Pluriennale -->
+                        <xs:enumeration value="05"/> <!-- Oneri di Recesso Anticipato -->
+                        <xs:enumeration value="99"/> <!-- Altro -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="ALTRO" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="20"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DESCRIZIONE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="3000"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="LIMITANTE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Si, è limitante -->
+                        <xs:enumeration value="02"/> <!-- No, non è limitante -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ZoneOfferta section -->
+    <xs:complexType name="ZoneOffertaType">
+        <xs:sequence>
+            <xs:element name="REGIONE" minOccurs="0" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="PROVINCIA" minOccurs="0" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="3"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="COMUNE" minOccurs="0" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="6"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Sconto section -->
+    <xs:complexType name="ScontoType">
+        <xs:sequence>
+            <xs:element name="NOME">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="255"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DESCRIZIONE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="3000"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="CODICE_COMPONENTE_FASCIA" minOccurs="0" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- PCV -->
+                        <xs:enumeration value="02"/> <!-- PPE -->
+                        <xs:enumeration value="03"/> <!-- CCR -->
+                        <xs:enumeration value="04"/> <!-- CPR -->
+                        <xs:enumeration value="05"/> <!-- GRAD -->
+                        <xs:enumeration value="06"/> <!-- QTint -->
+                        <xs:enumeration value="07"/> <!-- QTpsv -->
+                        <xs:enumeration value="09"/> <!-- QVD_Fissa -->
+                        <xs:enumeration value="10"/> <!-- QVD_Variabile -->
+                        <xs:enumeration value="11"/> <!-- F1 -->
+                        <xs:enumeration value="12"/> <!-- F2 -->
+                        <xs:enumeration value="13"/> <!-- F3 -->
+                        <xs:enumeration value="14"/> <!-- F4 -->
+                        <xs:enumeration value="15"/> <!-- F5 -->
+                        <xs:enumeration value="16"/> <!-- F6 -->
+                        <xs:enumeration value="17"/> <!-- Peak -->
+                        <xs:enumeration value="18"/> <!-- OffPeak -->
+                        <xs:enumeration value="91"/> <!-- F2+F3 -->
+                        <xs:enumeration value="92"/> <!-- F1+F3 -->
+                        <xs:enumeration value="93"/> <!-- F1+F2 -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="VALIDITA" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Ingresso -->
+                        <xs:enumeration value="02"/> <!-- entro 12 mesi -->
+                        <xs:enumeration value="03"/> <!-- oltre 12 mesi -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="IVA_SCONTO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- SI -->
+                        <xs:enumeration value="02"/> <!-- NO -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="PeriodoValidita" type="PeriodoValiditaType" minOccurs="0"/>
+            <xs:element name="Condizione" type="ScontoCondizioneType"/>
+            <xs:element name="PREZZISconto" type="PREZZIScontoType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ScontoCondizione section -->
+    <xs:complexType name="ScontoCondizioneType">
+        <xs:sequence>
+            <xs:element name="CONDIZIONE_APPLICAZIONE">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="00"/> <!-- Non condizionato -->
+                        <xs:enumeration value="01"/> <!-- Fatturazione elettronica -->
+                        <xs:enumeration value="02"/> <!-- Gestione online -->
+                        <xs:enumeration value="03"/> <!-- fatturazione elettronica+domiciliazione bancaria -->
+                        <xs:enumeration value="99"/> <!-- Altro -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DESCRIZIONE_CONDIZIONE" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="3000"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- PREZZISconto section -->
+    <xs:complexType name="PREZZIScontoType">
+        <xs:sequence>
+            <xs:element name="TIPOLOGIA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Sconto fisso -->
+                        <xs:enumeration value="02"/> <!-- Sconto Potenza -->
+                        <xs:enumeration value="03"/> <!-- Sconto Vendita -->
+                        <xs:enumeration value="04"/> <!-- Sconto su tutela -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="VALIDO_DA" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:totalDigits value="9"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="VALIDO_FINO" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:totalDigits value="9"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="UNITA_MISURA">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- €Anno -->
+                        <xs:enumeration value="02"/> <!-- €kW -->
+                        <xs:enumeration value="03"/> <!-- €kWh -->
+                        <xs:enumeration value="04"/> <!-- €Sm3 -->
+                        <xs:enumeration value="05"/> <!-- € -->
+                        <xs:enumeration value="06"/> <!-- Percentuale -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="PREZZO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:fractionDigits value="6"/>
+                        <xs:totalDigits value="12"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ProdottiServiziAggiuntivi section -->
+    <xs:complexType name="ProdottiServiziAggiuntiviType">
+        <xs:sequence>
+            <xs:element name="NOME">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="255"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DETTAGLIO">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="3000"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="MACROAREA" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="01"/> <!-- Caldaia -->
+                        <xs:enumeration value="02"/> <!-- Mobility -->
+                        <xs:enumeration value="03"/> <!-- Solare termico -->
+                        <xs:enumeration value="04"/> <!-- Fotovoltaico -->
+                        <xs:enumeration value="05"/> <!-- Climatizzazione -->
+                        <xs:enumeration value="06"/> <!-- Polizza assicurativa -->
+                        <xs:enumeration value="99"/> <!-- Altro -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="DETTAGLI_MACROAREA" minOccurs="0">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:maxLength value="100"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
