@@ -159,13 +159,13 @@ export function WizardContainer() {
   const handleStepSubmit = useCallback(
     async (data: any) => {
       try {
-        // Extract the section data from the nested form data
+        // Get the section key from the current step
         const sectionKey = currentStepConfig?.id;
-        const sectionData = data[sectionKey];
         
         // Update form data for the current section
-        if (sectionKey && sectionData) {
-          updateFormData(sectionKey, sectionData);
+        // The forms submit data directly, not nested
+        if (sectionKey) {
+          updateFormData(sectionKey, data);
           markStepCompleted(currentStep);
 
           // Move to next step if available

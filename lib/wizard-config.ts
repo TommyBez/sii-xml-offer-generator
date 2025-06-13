@@ -36,6 +36,14 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'activation-methods',
+    title: 'Activation Methods',
+    description: 'Define how customers can activate this offer',
+    component: 'ActivationMethodsForm',
+    validation: 'activationMethodsSchema',
+    dependsOn: ['identification'],
+  },
+  {
     id: 'issuer-details',
     title: 'Issuer Details',
     description: 'Company information for the offer issuer',

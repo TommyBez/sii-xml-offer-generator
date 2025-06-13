@@ -131,3 +131,27 @@ export type OfferItem = z.infer<typeof offerItemSchema>;
 export type Offer = z.infer<typeof offerSchema>;
 export type WizardStep = z.infer<typeof wizardStepSchema>;
 export type OfferDetailsData = z.infer<typeof offerDetailsSchema>;
+
+// Activation Methods validation schema
+export const activationMethodsSchema = z
+  .object({
+    MODALITA: z
+      .array(z.enum(["01", "02", "03", "04", "05", "99"]))
+      .min(1, "Select at least one activation method"),
+    DESCRIZIONE: z.string().max(2000).optional(),
+  })
+  .refine(
+    (data) => {
+      // If "Other" (99) is selected, description is required
+      if (data.MODALITA.includes("99") && !data.DESCRIZIONE) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Description required when 'Other' is selected",
+      path: ["DESCRIZIONE"],
+    }
+  );
+
+export type ActivationMethodsData = z.infer<typeof activationMethodsSchema>;
