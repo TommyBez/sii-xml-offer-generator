@@ -1,0 +1,53 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Task File Generation Guidelines
+
+> Activation: Apply these guidelines whenever generating or updating plain-text task files in the workspace.
+
+## 1. File Formatting
+
+✅ **DO** use a consistent, human-readable layout for every task file.
+
+* Start each line with a `#` followed by the property label and its value.
+* Separate logical sections (e.g., metadata vs. description) with a blank line.
+* Keep line endings UNIX-style (`\n`).
+
+## 2. Required Properties
+
+Each task file **must** include the following properties in this exact order:
+
+1. `Task ID`  – unique identifier for the task
+2. `Title`    – concise, descriptive summary
+3. `Status`   – one of `pending`, `in-progress`, or `done`
+4. `Dependencies` – comma-separated list or `None`
+
+Example header (values are illustrative):
+```
+# Task ID: 42
+# Title: Implement login flow
+# Status: pending
+# Dependencies: 17 (done), 25 (pending)
+```
+
+## 3. Dependency Formatting
+
+When listing dependencies:
+
+* Show each dependency as its `Task ID` followed by the current **status in parentheses**.
+* Separate multiple dependencies with commas.
+* If there are no dependencies, write `None`.
+
+## 4. Consistency Checks
+
+Before saving a task file, verify:
+
+* All required properties are present and correctly ordered.
+* Status values are lowercase and match the allowed set.
+* Dependency statuses reflect the most recent information.
+
+## 5. References
+
+For general rule-writing principles, see [Rule Generation Guidelines](mdc:rule-generation-guidelines.mdc).
