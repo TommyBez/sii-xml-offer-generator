@@ -118,6 +118,20 @@ export const wizardSteps: WizardStepConfig[] = [
     },
   },
   {
+    id: 'time-bands',
+    title: 'Price Type & Time Bands',
+    description: 'Configure time band types and weekly schedules',
+    component: 'TimeBandsForm',
+    validation: 'timeBandsSchema',
+    dependsOn: ['offer-details'],
+    isVisible: (formData) => {
+      // Show only for electricity offers (TIPO_MERCATO = '01') and not FLAT (TIPO_OFFERTA ≠ '03')
+      const marketType = formData?.offerDetails?.TIPO_MERCATO;
+      const offerType = formData?.offerDetails?.TIPO_OFFERTA;
+      return marketType === '01' && offerType !== '03';
+    },
+  },
+  {
     id: 'dual-offers',
     title: 'Dual Fuel Offer',
     description: 'Link electricity and gas offers for dual fuel package',
