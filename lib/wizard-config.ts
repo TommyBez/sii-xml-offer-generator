@@ -82,6 +82,20 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'regulated-components',
+    title: 'Regulated Components',
+    description: 'Select authority-defined price components (optional)',
+    component: 'RegulatedComponentsForm',
+    validation: 'regulatedComponentsSchema',
+    dependsOn: ['offer-details'],
+    isOptional: true,
+    isVisible: (formData) => {
+      // Show only for electricity or gas markets (not dual fuel)
+      const marketType = formData?.offerDetails?.TIPO_MERCATO;
+      return marketType === '01' || marketType === '02';
+    },
+  },
+  {
     id: 'energy-price-references',
     title: 'Energy Price References',
     description: 'Price index selection for variable offers',

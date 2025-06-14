@@ -70,6 +70,9 @@ export interface WizardFormData {
   serviceLevel?: any;
   specialConditions?: any;
   regulatoryCompliance?: any;
+  regulatedComponents?: {
+    CODICE?: string[];
+  };
   [key: string]: any; // Allow additional properties
 }
 

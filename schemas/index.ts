@@ -301,3 +301,10 @@ export const paymentMethodsSchema = z
   );
 
 export type PaymentMethodsData = z.infer<typeof paymentMethodsSchema>;
+
+// Regulated Components validation schema
+export const regulatedComponentsSchema = z.object({
+  CODICE: z.array(z.string()).optional().default([]),
+});
+
+export type RegulatedComponentsData = z.infer<typeof regulatedComponentsSchema>;
