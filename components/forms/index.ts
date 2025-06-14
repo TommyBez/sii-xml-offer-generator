@@ -14,6 +14,7 @@ export const formComponents = {
   PaymentMethodsForm: lazy(() => import('./payment-methods-form').then(mod => ({ default: mod.PaymentMethodsForm }))),
   RegulatedComponentsForm: lazy(() => import('./regulated-components-form').then(mod => ({ default: mod.RegulatedComponentsForm }))),
   TimeBandsForm: lazy(() => import('./time-bands-form').then(mod => ({ default: mod.TimeBandsForm }))),
+  CompanyComponentsForm: lazy(() => import('./company-components-form').then(mod => ({ default: mod.CompanyComponentsForm }))),
   // Add other form components as they are created
   // IssuerDetailsForm: lazy(() => import('./issuer-details-form').then(mod => ({ default: mod.IssuerDetailsForm }))),
   // RecipientDetailsForm: lazy(() => import('./recipient-details-form').then(mod => ({ default: mod.RecipientDetailsForm }))),
@@ -34,9 +35,11 @@ export * from './dual-offers-form';
 export * from './payment-methods-form';
 export * from './regulated-components-form';
 export * from './time-bands-form';
+export * from './company-components-form';
 export { OfferValidityForm } from './offer-validity-form';
 export { EnergyPriceReferencesForm } from './energy-price-references-form';
 export { OfferDetailsForm } from './offer-details-form';
 export { PaymentMethodsForm } from './payment-methods-form';
 export { RegulatedComponentsForm } from './regulated-components-form';
-export { TimeBandsForm } from './time-bands-form'; 
+export { TimeBandsForm } from './time-bands-form';
+export { CompanyComponentsForm } from './company-components-form'; 
