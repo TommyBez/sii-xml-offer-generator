@@ -145,6 +145,14 @@ export const wizardSteps: WizardStepConfig[] = [
     },
   },
   {
+    id: 'contractual-conditions',
+    title: 'Contractual Conditions',
+    description: 'Specify terms and conditions for the offer',
+    component: 'ContractualConditionsForm',
+    validation: 'contractualConditionsSchema',
+    dependsOn: ['identification'],
+  },
+  {
     id: 'issuer-details',
     title: 'Issuer Details',
     description: 'Company information for the offer issuer',
