@@ -46,6 +46,7 @@ export function WizardStepContent({ step, onSubmit }: WizardStepContentProps) {
     'identification': 'identification',
     'offer-basic': 'offerBasic',
     'offer-details': 'offerDetails',
+    'offer-characteristics': 'offerCharacteristics',
     'activation-methods': 'activationMethods',
     'contact-information': 'contactInformation',
     'offer-validity': 'offerValidity',

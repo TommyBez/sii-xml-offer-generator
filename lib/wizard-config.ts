@@ -36,6 +36,20 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'offer-characteristics',
+    title: 'Offer Characteristics',
+    description: 'Define consumption and power limits for this offer',
+    component: 'OfferCharacteristicsForm',
+    validation: 'offerCharacteristicsSchema',
+    dependsOn: ['offer-details'],
+    isVisible: (formData) => {
+      // Show for FLAT offers (consumption limits) or electricity offers (power limits)
+      const offerType = formData?.offerDetails?.TIPO_OFFERTA;
+      const marketType = formData?.offerDetails?.TIPO_MERCATO;
+      return offerType === '03' || marketType === '01';
+    },
+  },
+  {
     id: 'activation-methods',
     title: 'Activation Methods',
     description: 'Define how customers can activate this offer',

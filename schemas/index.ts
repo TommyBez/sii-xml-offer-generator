@@ -240,3 +240,40 @@ export const offerValiditySchema = z
 
 export type EnergyPriceReferencesData = z.infer<typeof energyPriceReferencesSchema>;
 export type OfferValidityData = z.infer<typeof offerValiditySchema>;
+
+// Offer Characteristics validation schema
+export const offerCharacteristicsSchema = z
+  .object({
+    CONSUMO_MIN: z.number().int().min(0).max(999999999).optional(),
+    CONSUMO_MAX: z.number().int().min(0).max(999999999).optional(),
+    POTENZA_MIN: z.number().multipleOf(0.1).min(0).max(99.9).optional(),
+    POTENZA_MAX: z.number().multipleOf(0.1).min(0).max(99.9).optional(),
+  })
+  .refine(
+    (data) => {
+      // Consumption range validation
+      if (data.CONSUMO_MIN !== undefined && data.CONSUMO_MAX !== undefined) {
+        return data.CONSUMO_MAX > data.CONSUMO_MIN;
+      }
+      return true;
+    },
+    {
+      message: "Maximum consumption must be greater than minimum consumption",
+      path: ["CONSUMO_MAX"],
+    }
+  )
+  .refine(
+    (data) => {
+      // Power range validation
+      if (data.POTENZA_MIN !== undefined && data.POTENZA_MAX !== undefined) {
+        return data.POTENZA_MAX > data.POTENZA_MIN;
+      }
+      return true;
+    },
+    {
+      message: "Maximum power must be greater than minimum power",
+      path: ["POTENZA_MAX"],
+    }
+  );
+
+export type OfferCharacteristicsData = z.infer<typeof offerCharacteristicsSchema>;

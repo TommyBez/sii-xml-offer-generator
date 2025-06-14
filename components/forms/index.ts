@@ -9,6 +9,7 @@ export const formComponents = {
   ContactInformationForm: lazy(() => import('./contact-information-form').then(mod => ({ default: mod.ContactInformationForm }))),
   EnergyPriceReferencesForm: lazy(() => import('./energy-price-references-form').then(mod => ({ default: mod.EnergyPriceReferencesForm }))),
   OfferValidityForm: lazy(() => import('./offer-validity-form').then(mod => ({ default: mod.OfferValidityForm }))),
+  OfferCharacteristicsForm: lazy(() => import('./offer-characteristics-form').then(mod => ({ default: mod.OfferCharacteristicsForm }))),
   // Add other form components as they are created
   // IssuerDetailsForm: lazy(() => import('./issuer-details-form').then(mod => ({ default: mod.IssuerDetailsForm }))),
   // RecipientDetailsForm: lazy(() => import('./recipient-details-form').then(mod => ({ default: mod.RecipientDetailsForm }))),
@@ -23,4 +24,5 @@ export * from './offer-details-form';
 export * from './activation-methods-form';
 export * from './contact-information-form';
 export * from './energy-price-references-form';
-export * from './offer-validity-form'; 
+export * from './offer-validity-form';
+export * from './offer-characteristics-form'; 
