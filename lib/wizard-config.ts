@@ -96,6 +96,19 @@ export const wizardSteps: WizardStepConfig[] = [
     },
   },
   {
+    id: 'dual-offers',
+    title: 'Dual Fuel Offer',
+    description: 'Link electricity and gas offers for dual fuel package',
+    component: 'DualOffersForm',
+    validation: 'dualOffersSchema',
+    dependsOn: ['offer-details'],
+    isVisible: (formData) => {
+      // Show only for dual fuel offers (TIPO_MERCATO = '03')
+      const marketType = formData?.offerDetails?.TIPO_MERCATO;
+      return marketType === '03';
+    },
+  },
+  {
     id: 'issuer-details',
     title: 'Issuer Details',
     description: 'Company information for the offer issuer',
