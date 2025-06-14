@@ -7,6 +7,7 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { WizardStepConfig } from '@/lib/wizard-config';
 import { formComponents, type FormComponentName } from '@/components/forms';
+import { useWizardStore } from '@/store/wizard-store';
 
 // Placeholder component for forms that haven't been implemented yet
 const FormPlaceholder = ({ step, onSubmit }: { step: WizardStepConfig; onSubmit: (data: any) => void }) => {
@@ -38,6 +39,24 @@ interface WizardStepContentProps {
 }
 
 export function WizardStepContent({ step, onSubmit }: WizardStepContentProps) {
+  const formData = useWizardStore((state) => state.formData);
+  
+  // Map step IDs to form data keys
+  const stepToFormDataKey: Record<string, string> = {
+    'identification': 'identification',
+    'offer-basic': 'offerBasic',
+    'offer-details': 'offerDetails',
+    'activation-methods': 'activationMethods',
+    'contact-information': 'contactInformation',
+    'offer-validity': 'offerValidity',
+    'energy-price-references': 'energyPriceReferences',
+    // Add more mappings as needed
+  };
+  
+  // Get initial data for this step
+  const formDataKey = stepToFormDataKey[step.id];
+  const initialData = formDataKey ? formData[formDataKey] : undefined;
+  
   // Dynamically select the form component based on the step configuration
   const FormComponent = useMemo(() => {
     const componentName = step.component as FormComponentName;
@@ -69,7 +88,7 @@ export function WizardStepContent({ step, onSubmit }: WizardStepContentProps) {
               </div>
             }
           >
-            <FormComponent onSubmit={onSubmit} />
+            <FormComponent initialData={initialData} onSubmit={onSubmit} />
           </Suspense>
         ) : (
           <FormPlaceholder step={step} onSubmit={onSubmit} />

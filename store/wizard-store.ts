@@ -12,6 +12,10 @@ export interface WizardFormData {
     IDX_PREZZO_ENERGIA?: string;
     ALTRO?: string;
   };
+  offerValidity?: {
+    DATA_INIZIO?: string;
+    DATA_FINE?: string;
+  };
   offerNumber?: string;
   date?: Date;
   validUntil?: Date;

@@ -52,6 +52,14 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'offer-validity',
+    title: 'Offer Validity Period',
+    description: 'Set the start and end dates for this offer',
+    component: 'OfferValidityForm',
+    validation: 'offerValiditySchema',
+    dependsOn: ['identification'],
+  },
+  {
     id: 'energy-price-references',
     title: 'Energy Price References',
     description: 'Price index selection for variable offers',

@@ -195,4 +195,48 @@ export const energyPriceReferencesSchema = z
     }
   );
 
+// Offer Validity validation schema
+export const offerValiditySchema = z
+  .object({
+    DATA_INIZIO: z
+      .string()
+      .regex(
+        /^\d{2}\/\d{2}\/\d{4}_\d{2}:\d{2}:\d{2}$/,
+        "Format must be DD/MM/YYYY_HH:MM:SS"
+      ),
+    DATA_FINE: z
+      .string()
+      .regex(
+        /^\d{2}\/\d{2}\/\d{4}_\d{2}:\d{2}:\d{2}$/,
+        "Format must be DD/MM/YYYY_HH:MM:SS"
+      ),
+  })
+  .refine(
+    (data) => {
+      // Parse Italian date format
+      const parseDate = (dateStr: string): Date => {
+        const [datePart, timePart] = dateStr.split('_');
+        const [day, month, year] = datePart.split('/');
+        const [hours, minutes, seconds] = timePart.split(':');
+        return new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+          parseInt(hours),
+          parseInt(minutes),
+          parseInt(seconds)
+        );
+      };
+      
+      const start = parseDate(data.DATA_INIZIO);
+      const end = parseDate(data.DATA_FINE);
+      return end > start;
+    },
+    {
+      message: "End date must be after start date",
+      path: ["DATA_FINE"],
+    }
+  );
+
 export type EnergyPriceReferencesData = z.infer<typeof energyPriceReferencesSchema>;
+export type OfferValidityData = z.infer<typeof offerValiditySchema>;
