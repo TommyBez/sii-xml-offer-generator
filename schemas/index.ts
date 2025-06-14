@@ -155,3 +155,44 @@ export const activationMethodsSchema = z
   );
 
 export type ActivationMethodsData = z.infer<typeof activationMethodsSchema>;
+
+// Contact Information validation schema
+export const contactInformationSchema = z.object({
+  TELEFONO: z
+    .string()
+    .max(15)
+    .regex(/^[\d\s\+\-\(\)]+$/, "Invalid phone format")
+    .transform((val: string) => val.replace(/\s/g, "")), // Remove spaces
+  URL_SITO_VENDITORE: z
+    .string()
+    .max(100)
+    .url("Invalid URL format")
+    .or(z.literal("")), // Allow empty
+  URL_OFFERTA: z.string().max(100).url("Invalid URL format").or(z.literal("")), // Allow empty
+});
+
+export type ContactInformationData = z.infer<typeof contactInformationSchema>;
+
+// Energy Price References validation schema
+export const energyPriceReferencesSchema = z
+  .object({
+    IDX_PREZZO_ENERGIA: z.string({
+      required_error: "Price index is required",
+    }),
+    ALTRO: z.string().max(3000).optional(),
+  })
+  .refine(
+    (data) => {
+      // If "Other" (99) is selected, description is required
+      if (data.IDX_PREZZO_ENERGIA === "99" && !data.ALTRO) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Description required for custom index",
+      path: ["ALTRO"],
+    }
+  );
+
+export type EnergyPriceReferencesData = z.infer<typeof energyPriceReferencesSchema>;

@@ -8,6 +8,10 @@ export interface WizardFormData {
     PIVA_UTENTE?: string;
     COD_OFFERTA?: string;
   };
+  energyPriceReferences?: {
+    IDX_PREZZO_ENERGIA?: string;
+    ALTRO?: string;
+  };
   offerNumber?: string;
   date?: Date;
   validUntil?: Date;

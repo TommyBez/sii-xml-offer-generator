@@ -52,6 +52,28 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'energy-price-references',
+    title: 'Energy Price References',
+    description: 'Price index selection for variable offers',
+    component: 'EnergyPriceReferencesForm',
+    validation: 'energyPriceReferencesSchema',
+    dependsOn: ['offer-details'],
+    isVisible: (formData) => {
+      // Show only for variable offers (TIPO_OFFERTA = '02')
+      const offerType = formData?.offerDetails?.TIPO_OFFERTA;
+      if (offerType !== '02') return false;
+      
+      // Hide if discount with TIPOLOGIA = '04' exists
+      const discounts = formData?.discounts;
+      if (discounts && Array.isArray(discounts)) {
+        const hasType04Discount = discounts.some((discount: any) => discount?.TIPOLOGIA === '04');
+        if (hasType04Discount) return false;
+      }
+      
+      return true;
+    },
+  },
+  {
     id: 'issuer-details',
     title: 'Issuer Details',
     description: 'Company information for the offer issuer',
