@@ -74,6 +74,14 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'payment-methods',
+    title: 'Payment Methods',
+    description: 'Select accepted payment methods for this offer',
+    component: 'PaymentMethodsForm',
+    validation: 'paymentMethodsSchema',
+    dependsOn: ['identification'],
+  },
+  {
     id: 'energy-price-references',
     title: 'Energy Price References',
     description: 'Price index selection for variable offers',

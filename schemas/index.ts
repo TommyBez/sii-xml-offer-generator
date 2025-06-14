@@ -277,3 +277,27 @@ export const offerCharacteristicsSchema = z
   );
 
 export type OfferCharacteristicsData = z.infer<typeof offerCharacteristicsSchema>;
+
+// Payment Methods validation schema
+export const paymentMethodsSchema = z
+  .object({
+    MODALITA_PAGAMENTO: z
+      .array(z.enum(["01", "02", "03", "04", "99"]))
+      .min(1, "Select at least one payment method"),
+    DESCRIZIONE: z.string().max(25).optional(),
+  })
+  .refine(
+    (data) => {
+      // If "Other" (99) is selected, description is required
+      if (data.MODALITA_PAGAMENTO.includes("99") && !data.DESCRIZIONE) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Description required when 'Other' is selected",
+      path: ["DESCRIZIONE"],
+    }
+  );
+
+export type PaymentMethodsData = z.infer<typeof paymentMethodsSchema>;

@@ -51,6 +51,7 @@ export function WizardStepContent({ step, onSubmit }: WizardStepContentProps) {
     'contact-information': 'contactInformation',
     'offer-validity': 'offerValidity',
     'energy-price-references': 'energyPriceReferences',
+    'payment-methods': 'paymentMethods',
     // Add more mappings as needed
   };
   
