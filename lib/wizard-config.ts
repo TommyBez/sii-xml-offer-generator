@@ -237,6 +237,15 @@ export const wizardSteps: WizardStepConfig[] = [
     isOptional: true,
   },
   {
+    id: 'additional-services',
+    title: 'Additional Products & Services',
+    description: 'Optional products and services to enhance your offer',
+    component: 'AdditionalServicesForm',
+    validation: 'additionalServicesSchema',
+    dependsOn: ['identification'],
+    isOptional: true,
+  },
+  {
     id: 'payment-terms',
     title: 'Payment Terms',
     description: 'Define payment methods and schedules',

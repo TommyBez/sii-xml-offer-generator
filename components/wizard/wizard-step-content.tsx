@@ -53,6 +53,7 @@ export function WizardStepContent({ step, onSubmit }: WizardStepContentProps) {
     'energy-price-references': 'energyPriceReferences',
     'payment-methods': 'paymentMethods',
     'time-bands': 'timeBands',
+    'additional-services': 'additionalServices',
     // Add more mappings as needed
   };
   

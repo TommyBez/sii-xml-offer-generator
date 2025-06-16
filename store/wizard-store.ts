@@ -73,6 +73,14 @@ export interface WizardFormData {
   regulatedComponents?: {
     CODICE?: string[];
   };
+  additionalServices?: {
+    services?: Array<{
+      NOME?: string;
+      DETTAGLIO?: string;
+      MACROAREA?: string;
+      DETTAGLI_MACROAREA?: string;
+    }>;
+  };
   [key: string]: any; // Allow additional properties
 }
 

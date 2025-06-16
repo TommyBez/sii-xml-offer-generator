@@ -388,3 +388,34 @@ export const discountsSchema = z.object({
 });
 
 export type DiscountsData = z.infer<typeof discountsSchema>;
+
+// Additional Services validation schema
+export const additionalServicesSchema = z.object({
+  services: z
+    .array(
+      z
+        .object({
+          NOME: z.string().min(1, "Service name is required").max(255, "Maximum 255 characters allowed"),
+          DETTAGLIO: z.string().min(1, "Service details are required").max(3000, "Maximum 3000 characters allowed"),
+          MACROAREA: z.string().optional(),
+          DETTAGLI_MACROAREA: z.string().max(100, "Maximum 100 characters allowed").optional(),
+        })
+        .refine(
+          (data) => {
+            // DETTAGLI_MACROAREA required when MACROAREA = '99'
+            if (data.MACROAREA === "99" && !data.DETTAGLI_MACROAREA) {
+              return false;
+            }
+            return true;
+          },
+          {
+            message: "Category details required for 'Other' category",
+            path: ["DETTAGLI_MACROAREA"],
+          }
+        )
+    )
+    .optional()
+    .default([]), // Entire section is optional
+});
+
+export type AdditionalServicesData = z.infer<typeof additionalServicesSchema>;
