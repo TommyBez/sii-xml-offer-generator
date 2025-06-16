@@ -182,8 +182,8 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
         // ───────────────────── stepper slice ──────────────────────
         goTo: (id) => {
           const state = get();
-          // Check if step is accessible before navigation
-          if (state.canNavigateToStepId(id)) {
+          // Allow navigation to any visible step, let UI handle accessibility
+          if (state.isStepVisible(id)) {
             set((s) => {
               s.currentId = id;
             });

@@ -77,15 +77,8 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
         initialStep={currentId}
         onStepChange={(step) => {
           const stepId = step.id as any;
-          if (canNavigateToStepId(stepId)) {
-            goTo(stepId);
-          } else {
-            toast({
-              title: 'Cannot navigate to this step',
-              description: 'Please complete previous steps or check step requirements.',
-              variant: 'destructive',
-            });
-          }
+          // Update Zustand store when stepperize state changes
+          goTo(stepId);
         }}
         className="flex min-h-screen flex-col"
       >
@@ -145,6 +138,8 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                             of={step.id}
                             onClick={() => {
                               if (isAccessible) {
+                                // Update both stepperize and store state
+                                goTo(stepId);
                                 methods.goTo(step.id);
                                 // Scroll active step into view
                                 setTimeout(() => {
@@ -157,6 +152,12 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                     });
                                   }
                                 }, 100);
+                              } else {
+                                toast({
+                                  title: 'Cannot navigate to this step',
+                                  description: 'Please complete previous steps or check step requirements.',
+                                  variant: 'destructive',
+                                });
                               }
                             }}
                             className={`
@@ -201,17 +202,18 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
             {/* Main content area */}
             <main className="flex-1 overflow-y-auto">
               <div className="container mx-auto px-4 py-8">
-                {/* Use stepperize switch to conditionally render content */}
+                {/* Use stepperize switch for proper content switching */}
                 {methods.switch(
-                  // Create switch object for all visible steps
-                  visibleSteps.reduce((acc, stepId) => {
-                    acc[stepId] = () => (
-                      <Stepper.Panel of={stepId}>
-                        {children}
-                      </Stepper.Panel>
-                    );
-                    return acc;
-                  }, {} as Record<string, () => React.ReactNode>)
+                  Object.fromEntries(
+                    visibleSteps.map(stepId => [
+                      stepId,
+                      (step) => (
+                        <Stepper.Panel of={stepId} key={stepId}>
+                          {children}
+                        </Stepper.Panel>
+                      )
+                    ])
+                  )
                 )}
               </div>
             </main>
@@ -260,7 +262,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                         }
                       }
                     }}
-                    disabled={!validMap[currentId]}
+                    disabled={!validMap[currentId] && visibleSteps.indexOf(currentId) !== visibleSteps.length - 1}
                     className="gap-2"
                   >
                     {visibleSteps.indexOf(currentId) === visibleSteps.length - 1 ? 'Finish' : 'Next'}
