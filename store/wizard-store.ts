@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import { enableMapSet } from 'immer';
+import type { StepId } from '@/components/wizard/stepper-layout';
+import { stepOrder, isStepVisible, isStepAccessible, getVisibleSteps } from '@/components/wizard/stepper-layout';
+
+// Enable MapSet plugin for Immer to handle Set data structures
+enableMapSet();
 
 // Type for wizard form data structure
 export interface WizardFormData {
@@ -96,6 +103,32 @@ export interface WizardState {
 
 export type ValidationErrors = Record<string, Record<string, string>>;
 
+// Stepper state interface (new stepperize integration)
+export interface StepperState {
+  currentId: StepId;
+  completed: Set<StepId>;
+  validMap: Record<StepId, boolean>;
+  goTo: (id: StepId) => void;
+  next: () => void;
+  prev: () => void;
+  markValid: (id: StepId, valid: boolean) => void;
+  resetStepper: () => void;
+  getVisibleSteps: () => StepId[];
+  getAccessibleSteps: () => StepId[];
+  isStepVisible: (stepId: StepId) => boolean;
+  isStepAccessible: (stepId: StepId) => boolean;
+  canNavigateToStepId: (stepId: StepId) => boolean;
+}
+
+// Stepper actions interface (new stepperize integration)
+export interface StepperActions {
+  goTo: (id: StepId) => void;
+  next: () => void;
+  prev: () => void;
+  markValid: (id: StepId, valid: boolean) => void;
+  resetStepper: () => void;
+}
+
 // Wizard actions interface
 export interface WizardActions {
   setCurrentStep: (step: number) => void;
@@ -120,99 +153,178 @@ const initialState: WizardState = {
   lastSavedAt: null,
 };
 
+// Initial stepper state
+const initialStepperState: StepperState = {
+  currentId: stepOrder[0],
+  completed: new Set<StepId>(),
+  validMap: {} as Record<StepId, boolean>,
+  goTo: () => {},
+  next: () => {},
+  prev: () => {},
+  markValid: () => {},
+  resetStepper: () => {},
+  getVisibleSteps: () => [],
+  getAccessibleSteps: () => [],
+  isStepVisible: () => false,
+  isStepAccessible: () => false,
+  canNavigateToStepId: () => false,
+};
+
 // Create the store with persistence
-export const useWizardStore = create<WizardState & WizardActions>()(
+export const useWizardStore = create<WizardState & WizardActions & StepperState & StepperActions>()(
   devtools(
     persist(
-      (set, get) => ({
+      immer((set, get) => ({
         // State
         ...initialState,
+        ...initialStepperState,
 
-        // Actions
+        // ───────────────────── stepper slice ──────────────────────
+        goTo: (id) => {
+          const state = get();
+          // Check if step is accessible before navigation
+          if (state.canNavigateToStepId(id)) {
+            set((s) => {
+              s.currentId = id;
+            });
+          }
+        },
+        
+        next: () => {
+          const state = get();
+          const visibleSteps = state.getVisibleSteps();
+          const currentIndex = visibleSteps.indexOf(state.currentId);
+          
+          if (currentIndex < visibleSteps.length - 1) {
+            const nextStepId = visibleSteps[currentIndex + 1];
+            if (state.canNavigateToStepId(nextStepId)) {
+              set((s) => {
+                s.currentId = nextStepId;
+              });
+            }
+          }
+        },
+        
+        prev: () => {
+          const state = get();
+          const visibleSteps = state.getVisibleSteps();
+          const currentIndex = visibleSteps.indexOf(state.currentId);
+          
+          if (currentIndex > 0) {
+            const prevStepId = visibleSteps[currentIndex - 1];
+            set((s) => {
+              s.currentId = prevStepId;
+            });
+          }
+        },
+        
+        markValid: (id, valid) => set((s) => {
+          s.validMap[id] = valid;
+          
+          // Mark step as completed if it becomes valid
+          if (valid) {
+            s.completed.add(id);
+          } else {
+            s.completed.delete(id);
+          }
+        }),
+        
+        resetStepper: () => set((s) => {
+          s.currentId = stepOrder[0];
+          s.completed.clear();
+          s.validMap = {} as Record<StepId, boolean>;
+        }),
+
+        // New conditional logic methods
+        getVisibleSteps: () => {
+          const state = get();
+          return getVisibleSteps(state, state.completed);
+        },
+
+        getAccessibleSteps: () => {
+          const state = get();
+          const visibleSteps = state.getVisibleSteps();
+          return visibleSteps.filter(stepId => state.isStepAccessible(stepId));
+        },
+
+        isStepVisible: (stepId) => {
+          const state = get();
+          return isStepVisible(stepId, state);
+        },
+
+        isStepAccessible: (stepId) => {
+          const state = get();
+          return isStepAccessible(stepId, state, state.completed);
+        },
+
+        canNavigateToStepId: (stepId) => {
+          const state = get();
+          return state.isStepVisible(stepId) && state.isStepAccessible(stepId);
+        },
+
+        // ───────────────────── original wizard actions ──────────────────────
         setCurrentStep: (step) => {
-          set({ currentStep: step }, false, 'setCurrentStep');
+          set((state) => {
+            state.currentStep = step;
+          });
         },
 
         markStepCompleted: (step) => {
-          set(
-            (state) => ({
-              completedSteps: new Set([...state.completedSteps, step]),
-            }),
-            false,
-            'markStepCompleted'
-          );
+          set((state) => {
+            state.completedSteps.add(step);
+          });
         },
 
         markStepIncomplete: (step) => {
-          set(
-            (state) => {
-              const newCompletedSteps = new Set(state.completedSteps);
-              newCompletedSteps.delete(step);
-              return { completedSteps: newCompletedSteps };
-            },
-            false,
-            'markStepIncomplete'
-          );
+          set((state) => {
+            state.completedSteps.delete(step);
+          });
         },
 
         updateFormData: (section, data) => {
-          set(
-            (state) => ({
-              formData: {
-                ...state.formData,
-                [section]: data,
-              },
-              isDirty: true,
-            }),
-            false,
-            'updateFormData'
-          );
+          set((state) => {
+            // Use Object.assign to properly merge the data
+            state.formData[section] = Object.assign({}, state.formData[section], data);
+            state.isDirty = true;
+          });
         },
 
         setValidationErrors: (section, errors) => {
-          set(
-            (state) => ({
-              validationErrors: {
-                ...state.validationErrors,
-                [section]: errors,
-              },
-            }),
-            false,
-            'setValidationErrors'
-          );
+          set((state) => {
+            state.validationErrors[section] = errors;
+          });
         },
 
         clearValidationErrors: (section) => {
-          set(
-            (state) => {
-              if (section) {
-                const { [section]: _, ...rest } = state.validationErrors;
-                return { validationErrors: rest };
-              }
-              return { validationErrors: {} };
-            },
-            false,
-            'clearValidationErrors'
-          );
+          set((state) => {
+            if (section) {
+              delete state.validationErrors[section];
+            } else {
+              state.validationErrors = {};
+            }
+          });
         },
 
         setIsDirty: (isDirty) => {
-          set({ isDirty }, false, 'setIsDirty');
+          set((state) => {
+            state.isDirty = isDirty;
+          });
         },
 
         saveDraft: () => {
-          set(
-            {
-              isDirty: false,
-              lastSavedAt: new Date(),
-            },
-            false,
-            'saveDraft'
-          );
+          set((state) => {
+            state.isDirty = false;
+            state.lastSavedAt = new Date();
+          });
         },
 
         resetWizard: () => {
-          set(initialState, false, 'resetWizard');
+          set((state) => {
+            // Reset wizard state
+            Object.assign(state, initialState);
+            // Reset stepper state
+            Object.assign(state, initialStepperState);
+          });
         },
 
         canNavigateToStep: (step) => {
@@ -229,7 +341,7 @@ export const useWizardStore = create<WizardState & WizardActions>()(
           }
           return true;
         },
-      }),
+      })),
       {
         name: 'wizard-storage',
         storage: createJSONStorage(() => localStorage),
@@ -238,11 +350,20 @@ export const useWizardStore = create<WizardState & WizardActions>()(
           completedSteps: Array.from(state.completedSteps),
           currentStep: state.currentStep,
           lastSavedAt: state.lastSavedAt,
+          // Stepper state
+          currentId: state.currentId,
+          completed: Array.from(state.completed),
+          validMap: state.validMap,
         }),
         onRehydrateStorage: () => (state) => {
-          if (state && state.completedSteps) {
-            // Convert array back to Set after rehydration
-            state.completedSteps = new Set(state.completedSteps as any);
+          if (state) {
+            // Convert arrays back to Sets after rehydration
+            if (state.completedSteps) {
+              state.completedSteps = new Set(state.completedSteps as any);
+            }
+            if (state.completed) {
+              state.completed = new Set(state.completed as any);
+            }
           }
         },
       }
