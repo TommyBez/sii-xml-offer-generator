@@ -153,6 +153,15 @@ export const wizardSteps: WizardStepConfig[] = [
     dependsOn: ['identification'],
   },
   {
+    id: 'offer-zones',
+    title: 'Offer Zones',
+    description: 'Specify geographical availability via regions, provinces, municipalities',
+    component: 'OfferZonesForm',
+    validation: 'offerZonesSchema',
+    dependsOn: ['identification'],
+    isOptional: true,
+  },
+  {
     id: 'issuer-details',
     title: 'Issuer Details',
     description: 'Company information for the offer issuer',

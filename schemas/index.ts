@@ -308,3 +308,29 @@ export const regulatedComponentsSchema = z.object({
 });
 
 export type RegulatedComponentsData = z.infer<typeof regulatedComponentsSchema>;
+
+// Offer Zones validation schema
+export const offerZonesSchema = z.object({
+  REGIONE: z.array(z.string().regex(/^\d{2}$/, "Region code must be 2 digits")).optional(),
+  PROVINCIA: z.array(z.string().regex(/^\d{3}$/, "Province code must be 3 digits")).optional(),
+  COMUNE: z.array(z.string().regex(/^\d{6}$/, "Municipality code must be 6 digits")).optional(),
+}).refine(
+  (data) => {
+    // At least one selection required if any field is provided
+    const hasRegions = data.REGIONE && data.REGIONE.length > 0;
+    const hasProvinces = data.PROVINCIA && data.PROVINCIA.length > 0;
+    const hasMunicipalities = data.COMUNE && data.COMUNE.length > 0;
+    
+    // If any field is provided, at least one must have selections
+    if ((data.REGIONE || data.PROVINCIA || data.COMUNE) && !hasRegions && !hasProvinces && !hasMunicipalities) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Select at least one geographical area if specifying zones",
+    path: ["REGIONE"],
+  }
+);
+
+export type OfferZonesData = z.infer<typeof offerZonesSchema>;
