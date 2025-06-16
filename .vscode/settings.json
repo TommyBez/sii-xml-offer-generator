@@ -1,0 +1,25 @@
+{
+  "xml.fileAssociations": [
+    {
+      "pattern": "**/*.sii.xml",
+      "systemId": "./docs/xml-schema.xsd"
+    },
+    {
+      "pattern": "**/sii-*.xml",
+      "systemId": "./docs/xml-schema.xsd"
+    }
+  ],
+  "xml.validation.enabled": true,
+  "xml.validation.schema": {
+    "http://sii.example.com/offerta": "./docs/xml-schema.xsd"
+  },
+  "files.associations": {
+    "*.sii.xml": "xml",
+    "sii-*.xml": "xml"
+  },
+  "[xml]": {
+    "editor.formatOnSave": true,
+    "editor.autoClosingBrackets": "always",
+    "editor.autoClosingQuotes": "always"
+  }
+} 
