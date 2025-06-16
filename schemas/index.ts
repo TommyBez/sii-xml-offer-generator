@@ -334,3 +334,57 @@ export const offerZonesSchema = z.object({
 );
 
 export type OfferZonesData = z.infer<typeof offerZonesSchema>;
+
+// Discounts validation schema
+export const discountsSchema = z.object({
+  discounts: z.array(z.object({
+    NOME: z.string().min(1, 'Discount name is required').max(255),
+    DESCRIZIONE: z.string().min(1, 'Description is required').max(3000),
+    CODICE_COMPONENTE_FASCIA: z.array(z.string()).optional(),
+    VALIDITA: z.string().optional(),
+    IVA_SCONTO: z.enum(['01', '02']),
+    PeriodoValidita: z.object({
+      DURATA: z.number().min(1).optional(),
+      VALIDO_FINO: z.string().regex(/^\d{2}\/\d{4}$/, 'Format: MM/YYYY').optional(),
+      MESE_VALIDITA: z.array(z.string()).optional(),
+    }).optional(),
+    Condizione: z.object({
+      CONDIZIONE_APPLICAZIONE: z.string().min(1, 'Application condition is required'),
+      DESCRIZIONE_CONDIZIONE: z.string().optional(),
+    }).refine((data) => {
+      if (data.CONDIZIONE_APPLICAZIONE === '99') {
+        return !!data.DESCRIZIONE_CONDIZIONE && data.DESCRIZIONE_CONDIZIONE.length > 0;
+      }
+      return true;
+    }, {
+      message: 'Description is required when "Other" is selected',
+      path: ['DESCRIZIONE_CONDIZIONE'],
+    }),
+    PREZZISconto: z.array(z.object({
+      TIPOLOGIA: z.string().min(1, 'Discount type is required'),
+      VALIDO_DA: z.number().optional(),
+      VALIDO_FINO: z.number().optional(),
+      UNITA_MISURA: z.string().min(1, 'Unit of measure is required'),
+      PREZZO: z.number().refine(val => {
+        const str = val.toString();
+        const parts = str.split('.');
+        return !parts[1] || parts[1].length <= 6;
+      }, 'Maximum 6 decimal places allowed'),
+    })).min(1, 'At least one price configuration is required'),
+  })).refine((data) => {
+    // Either VALIDITA or PeriodoValidita, not both
+    return data.every(discount => {
+      const hasSimple = !!discount.VALIDITA;
+      const hasComplex = !!discount.PeriodoValidita && (
+        discount.PeriodoValidita.DURATA !== undefined ||
+        discount.PeriodoValidita.VALIDO_FINO !== undefined ||
+        (discount.PeriodoValidita.MESE_VALIDITA && discount.PeriodoValidita.MESE_VALIDITA.length > 0)
+      );
+      return hasSimple !== hasComplex;
+    });
+  }, {
+    message: 'Each discount must have either simple validity or period validity, not both',
+  }),
+});
+
+export type DiscountsData = z.infer<typeof discountsSchema>;
