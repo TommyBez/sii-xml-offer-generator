@@ -128,16 +128,18 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                           const isActive = Boolean(currentId === stepId);
                           const isValid = Boolean(validMap[stepId]);
 
-                          // Status information for tooltip
-                          const stepStatus = isCompleted 
-                            ? 'Completed' 
-                            : isActive 
+                          // Status information for tooltip - fix logic to match actual state
+                          const stepStatus = isActive 
                             ? 'In Progress' 
+                            : isCompleted && !isActive
+                            ? 'Completed' 
                             : isAccessible 
                             ? 'Available' 
                             : 'Locked';
                           
-                          const stepIcon = isCompleted 
+                          const stepIcon = isActive
+                            ? <Circle className="h-3 w-3" />
+                            : isCompleted && !isActive
                             ? <CheckCircle className="h-3 w-3" />
                             : isAccessible 
                             ? <Circle className="h-3 w-3" />
@@ -204,10 +206,10 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                   <div className="flex items-center justify-between text-xs">
                                     <span className="text-muted-foreground">Step {visibleSteps.indexOf(stepId) + 1} of {visibleSteps.length}</span>
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                      stepStatus === 'Completed' 
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                                        : stepStatus === 'In Progress'
+                                      stepStatus === 'In Progress'
                                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                                        : stepStatus === 'Completed' 
+                                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
                                         : stepStatus === 'Available'
                                         ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                                         : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
