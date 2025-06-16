@@ -95,8 +95,8 @@ interface GeographicSelectionPanelProps {
   type: 'regions' | 'provinces' | 'municipalities';
   selectedItems: string[];
   onSelectionChange: (items: string[]) => void;
-  filterRegion?: string;
-  filterProvince?: string;
+  filterRegion?: string | string[];
+  filterProvince?: string | string[];
 }
 
 function GeographicSelectionPanel({
@@ -116,13 +116,28 @@ function GeographicSelectionPanel({
         data = italianRegions;
         break;
       case 'provinces':
-        data = italianProvinces.filter(p => !filterRegion || p.regionCode === filterRegion);
+        data = italianProvinces.filter(p => {
+          if (!filterRegion || (Array.isArray(filterRegion) && filterRegion.length === 0)) {
+            return true;
+          }
+          if (Array.isArray(filterRegion)) {
+            return filterRegion.includes(p.regionCode!);
+          }
+          return p.regionCode === filterRegion;
+        });
         break;
       case 'municipalities':
-        data = italianMunicipalities.filter(m => 
-          (!filterRegion || m.regionCode === filterRegion) &&
-          (!filterProvince || m.provinceCode === filterProvince)
-        );
+        data = italianMunicipalities.filter(m => {
+          const regionMatch = !filterRegion || 
+            (Array.isArray(filterRegion) && filterRegion.length === 0) ||
+            (Array.isArray(filterRegion) ? filterRegion.includes(m.regionCode!) : m.regionCode === filterRegion);
+          
+          const provinceMatch = !filterProvince || 
+            (Array.isArray(filterProvince) && filterProvince.length === 0) ||
+            (Array.isArray(filterProvince) ? filterProvince.includes(m.provinceCode!) : m.provinceCode === filterProvince);
+          
+          return regionMatch && provinceMatch;
+        });
         break;
     }
 
@@ -167,14 +182,30 @@ function GeographicSelectionPanel({
     }
   };
 
+  const getFilteredInfo = () => {
+    if (type === 'provinces' && filterRegion && (Array.isArray(filterRegion) ? filterRegion.length > 0 : true)) {
+      return ' (filtered by selected regions)';
+    }
+    if (type === 'municipalities') {
+      if ((filterRegion && (Array.isArray(filterRegion) ? filterRegion.length > 0 : true)) || 
+          (filterProvince && (Array.isArray(filterProvince) ? filterProvince.length > 0 : true))) {
+        return ' (filtered by selected regions/provinces)';
+      }
+    }
+    return '';
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2">
           {getIcon()}
           {getTitle()}
+          <span className="text-sm text-muted-foreground font-normal">
+            {getFilteredInfo()}
+          </span>
           {selectedItems.length > 0 && (
-            <Badge variant="secondary">
+            <Badge variant="secondary" className="ml-auto">
               {selectedItems.length} selected
             </Badge>
           )}
@@ -295,12 +326,19 @@ function SelectedZonesSummary({
             <h4 className="font-medium text-sm mb-2">Regions ({regions.length})</h4>
             <div className="flex flex-wrap gap-2">
               {regions.map((code: string) => (
-                <Badge key={code} variant="secondary" className="gap-1">
-                  {getRegionName(code)}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
-                    onClick={() => onRemoveRegion(code)}
-                  />
+                <Badge key={code} variant="secondary" className="gap-1 pr-1">
+                  <span>{getRegionName(code)}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveRegion(code);
+                    }}
+                    className="ml-1 rounded-sm hover:bg-black/10 dark:hover:bg-white/10 p-0.5"
+                    aria-label={`Remove ${getRegionName(code)}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </Badge>
               ))}
             </div>
@@ -312,12 +350,19 @@ function SelectedZonesSummary({
             <h4 className="font-medium text-sm mb-2">Provinces ({provinces.length})</h4>
             <div className="flex flex-wrap gap-2">
               {provinces.map((code: string) => (
-                <Badge key={code} variant="secondary" className="gap-1">
-                  {getProvinceName(code)}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
-                    onClick={() => onRemoveProvince(code)}
-                  />
+                <Badge key={code} variant="secondary" className="gap-1 pr-1">
+                  <span>{getProvinceName(code)}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveProvince(code);
+                    }}
+                    className="ml-1 rounded-sm hover:bg-black/10 dark:hover:bg-white/10 p-0.5"
+                    aria-label={`Remove ${getProvinceName(code)}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </Badge>
               ))}
             </div>
@@ -329,12 +374,19 @@ function SelectedZonesSummary({
             <h4 className="font-medium text-sm mb-2">Municipalities ({municipalities.length})</h4>
             <div className="flex flex-wrap gap-2">
               {municipalities.slice(0, 10).map((code: string) => (
-                <Badge key={code} variant="secondary" className="gap-1">
-                  {getMunicipalityName(code)}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
-                    onClick={() => onRemoveMunicipality(code)}
-                  />
+                <Badge key={code} variant="secondary" className="gap-1 pr-1">
+                  <span>{getMunicipalityName(code)}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveMunicipality(code);
+                    }}
+                    className="ml-1 rounded-sm hover:bg-black/10 dark:hover:bg-white/10 p-0.5"
+                    aria-label={`Remove ${getMunicipalityName(code)}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </Badge>
               ))}
               {municipalities.length > 10 && (
@@ -432,6 +484,7 @@ export function OfferZonesForm() {
                       type="provinces"
                       selectedItems={provinces}
                       onSelectionChange={handleProvincesChange}
+                      filterRegion={regions}
                     />
                   </TabsContent>
 
@@ -440,6 +493,8 @@ export function OfferZonesForm() {
                       type="municipalities"
                       selectedItems={municipalities}
                       onSelectionChange={handleMunicipalitiesChange}
+                      filterRegion={regions}
+                      filterProvince={provinces}
                     />
                   </TabsContent>
                 </Tabs>
