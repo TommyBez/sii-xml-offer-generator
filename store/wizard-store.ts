@@ -238,28 +238,53 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
         // New conditional logic methods
         getVisibleSteps: () => {
           const state = get();
-          return getVisibleSteps(state, state.completed);
+          try {
+            return getVisibleSteps(state, state.completed);
+          } catch {
+            // Fallback for SSR/hydration
+            return stepOrder.slice(0, 3); // Return safe default
+          }
         },
 
         getAccessibleSteps: () => {
           const state = get();
-          const visibleSteps = state.getVisibleSteps();
-          return visibleSteps.filter(stepId => state.isStepAccessible(stepId));
+          try {
+            const visibleSteps = state.getVisibleSteps();
+            return visibleSteps.filter(stepId => state.isStepAccessible(stepId));
+          } catch {
+            // Fallback for SSR/hydration
+            return stepOrder.slice(0, 3);
+          }
         },
 
         isStepVisible: (stepId) => {
           const state = get();
-          return isStepVisible(stepId, state);
+          try {
+            return Boolean(isStepVisible(stepId, state));
+          } catch {
+            // Fallback for SSR/hydration - return true for first few steps
+            return stepOrder.indexOf(stepId) < 3;
+          }
         },
 
         isStepAccessible: (stepId) => {
           const state = get();
-          return isStepAccessible(stepId, state, state.completed);
+          try {
+            return Boolean(isStepAccessible(stepId, state, state.completed));
+          } catch {
+            // Fallback for SSR/hydration - return true for first few steps
+            return stepOrder.indexOf(stepId) < 3;
+          }
         },
 
         canNavigateToStepId: (stepId) => {
           const state = get();
-          return state.isStepVisible(stepId) && state.isStepAccessible(stepId);
+          try {
+            return Boolean(state.isStepVisible(stepId) && state.isStepAccessible(stepId));
+          } catch {
+            // Fallback for SSR/hydration
+            return stepOrder.indexOf(stepId) < 3;
+          }
         },
 
         // ───────────────────── original wizard actions ──────────────────────

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Save, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const { 
@@ -30,49 +30,44 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
   
   const { toast } = useToast();
 
-  // Set up form provider for the entire wizard
-  const formMethods = useForm({
-    mode: 'onChange',
+  // Add hydration flag to ensure consistent rendering
+  const [isHydrated, setIsHydrated] = useState(false);
+  
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+  
+  // Calculate visible steps consistently
+  const visibleSteps = useMemo(() => {
+    if (!isHydrated) {
+      // Return initial state during SSR to match server rendering
+      return ['identification', 'offer-basic', 'offer-details'];
+    }
+    return getVisibleSteps();
+  }, [getVisibleSteps, isHydrated]);
+  
+  // Default form for wizard-wide state
+  const methods = useForm({
     defaultValues: formData,
+    mode: 'onChange',
   });
 
-  // Sync form data with store
+  // Keep form in sync with store
   useEffect(() => {
-    const subscription = formMethods.watch((data) => {
-      // Update store when form changes
-      const currentStepId = currentId;
-      if (data && data[currentStepId]) {
-        // This will be handled by individual form components
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [formMethods, currentId]);
+    methods.reset(formData);
+  }, [formData, methods]);
 
-  // Get visible steps based on form data and conditional logic
-  const visibleSteps = useMemo(() => getVisibleSteps(), [getVisibleSteps]);
-  const accessibleSteps = useMemo(() => getAccessibleSteps(), [getAccessibleSteps]);
-
-  // Handle save draft
-  const handleSaveDraft = () => {
-    saveDraft();
-    toast({
-      title: 'Draft saved',
-      description: 'Your progress has been saved.',
-    });
-  };
-
-  // Handle reset
-  const handleReset = () => {
-    resetStepper();
-    formMethods.reset({});
-    toast({
-      title: 'Wizard reset',
-      description: 'All data has been cleared.',
-    });
-  };
+  if (!isHydrated) {
+    // Return minimal SSR-compatible version
+    return (
+      <div className="flex min-h-screen flex-col">
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <FormProvider {...formMethods}>
+    <FormProvider {...methods}>
       <Stepper.Provider
         initialStep={currentId}
         onStepChange={(step) => {
@@ -85,30 +80,28 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
         {({ methods }) => (
           <>
             {/* Header */}
-            <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <header className="border-b bg-background">
               <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold">Energy Offer Wizard</h1>
-                  <div className="flex items-center gap-4">
-                    <div className="text-sm text-muted-foreground">
-                      Step {visibleSteps.indexOf(currentId) + 1} of {visibleSteps.length}
+                  <div>
+                    <h1 className="text-2xl font-bold">Energy Offer Wizard</h1>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>Step {visibleSteps.indexOf(currentId) + 1} of {visibleSteps.length}</span>
                     </div>
-                    {isDirty && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleSaveDraft}
-                        className="gap-2"
-                      >
-                        <Save className="h-4 w-4" />
-                        Save Draft
-                      </Button>
-                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      onClick={handleReset}
-                      className="gap-2 text-destructive hover:text-destructive"
+                      onClick={() => {
+                        resetStepper();
+                        methods.reset();
+                        toast({
+                          title: 'Wizard reset',
+                          description: 'All progress has been cleared.',
+                        });
+                      }}
+                      className="gap-2"
                     >
                       <RotateCcw className="h-4 w-4" />
                       Reset
@@ -127,15 +120,28 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                       .filter(step => isStepVisible(step.id as any, formData))
                       .map((step, index) => {
                         const stepId = step.id as any;
-                        const isAccessible = isStepAccessible(stepId, formData, completed);
-                        const isCompleted = completed.has(stepId);
-                        const isActive = currentId === stepId;
-                        const isValid = validMap[stepId];
+                        // Ensure boolean values for consistent hydration
+                        const isAccessible = Boolean(isStepAccessible(stepId, formData, completed));
+                        const isCompleted = Boolean(completed.has(stepId));
+                        const isActive = Boolean(currentId === stepId);
+                        const isValid = Boolean(validMap[stepId]);
 
                         return (
                           <Stepper.Step
                             key={step.id}
                             of={step.id}
+                            className={`
+                              w-10 h-10 rounded-full border-2 flex items-center justify-center text-sm font-medium
+                              transition-all duration-200 relative cursor-pointer
+                              ${isActive
+                                ? 'bg-primary text-primary-foreground border-primary shadow-md' 
+                                : isCompleted
+                                ? 'bg-green-500 text-white border-green-500'
+                                : isAccessible
+                                ? 'bg-background border-border hover:border-primary hover:bg-primary/10'
+                                : 'bg-muted text-muted-foreground border-muted cursor-not-allowed opacity-50'
+                              }
+                            `}
                             onClick={() => {
                               if (isAccessible) {
                                 // Update both stepperize and store state
@@ -160,26 +166,12 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                 });
                               }
                             }}
-                            className={`
-                              flex items-center justify-center rounded-full transition-all
-                              h-10 w-10 text-sm font-medium flex-shrink-0
-                              ${isActive 
-                                ? 'bg-primary text-primary-foreground shadow-md' 
-                                : isAccessible 
-                                  ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-sm' 
-                                  : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
-                              }
-                              ${isCompleted && !isActive ? 'bg-green-500 text-white' : ''}
-                            `}
                             disabled={!isAccessible}
-                            title={`${step.title}${isCompleted ? ' (Completed)' : ''}`}
+                            title={step.title}
                           >
-                            {/* Step number or checkmark */}
-                            {isCompleted && !isActive ? '✓' : index + 1}
-                            
-                            {/* Small validation indicator dot */}
+                            {isCompleted ? '✓' : visibleSteps.indexOf(stepId) + 1}
                             {isValid && !isCompleted && !isActive && (
-                              <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                             )}
                           </Stepper.Step>
                         );
@@ -187,12 +179,12 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                   </div>
                 </div>
                 
-                {/* Current step info below the numbers */}
-                <div className="text-center mt-3">
-                  <p className="text-sm font-medium text-foreground">
+                {/* Current step info */}
+                <div className="text-center mt-4 space-y-1">
+                  <p className="font-medium text-foreground">
                     {methods.all.find(s => s.id === currentId)?.title}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Step {visibleSteps.indexOf(currentId) + 1} of {visibleSteps.length}
                   </p>
                 </div>
@@ -218,10 +210,10 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
               </div>
             </main>
 
-            {/* Navigation controls */}
-            <Stepper.Controls className="border-t bg-background">
-              <div className="container mx-auto px-4 py-4">
-                <div className="flex items-center justify-between">
+            {/* Footer Controls */}
+            <footer className="border-t bg-background p-4">
+              <div className="container mx-auto flex items-center justify-between">
+                <div className="flex items-center gap-4">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -268,8 +260,28 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                     {visibleSteps.indexOf(currentId) === visibleSteps.length - 1 ? 'Finish' : 'Next'}
                   </Button>
                 </div>
+
+                {isDirty && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        saveDraft();
+                        toast({
+                          title: 'Draft saved',
+                          description: 'Your progress has been saved.',
+                        });
+                      }}
+                      className="gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      Save Draft
+                    </Button>
+                  </div>
+                )}
               </div>
-            </Stepper.Controls>
+            </footer>
           </>
         )}
       </Stepper.Provider>

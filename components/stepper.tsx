@@ -155,7 +155,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
               data-variant={variant}
               data-label-orientation={labelOrientation}
               data-state={dataState}
-              data-disabled={props.disabled}
+              data-disabled={Boolean(props.disabled).toString()}
             >
               <Button
                 id={`step-${step.id}`}
@@ -178,7 +178,8 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
                     utils.getPrev(props.of)
                   )
                 }
-                {...props}
+                disabled={Boolean(props.disabled)}
+                {...(({ disabled, ...rest }) => rest)(props)}
               >
                 {icon ?? stepIndex + 1}
               </Button>
@@ -316,7 +317,7 @@ const StepperSeparator = ({
       date-component="stepper-separator"
       data-orientation={orientation}
       data-state={state}
-      data-disabled={disabled}
+      data-disabled={Boolean(disabled).toString()}
       role="separator"
       tabIndex={-1}
       className={classForSeparator({ orientation, labelOrientation })}
