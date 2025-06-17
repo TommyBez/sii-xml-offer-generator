@@ -166,7 +166,7 @@ export const wizardSteps: WizardStepConfig[] = [
     title: 'Issuer Details',
     description: 'Company information for the offer issuer',
     component: 'IssuerDetailsForm',
-    validation: 'companySchema',
+    validation: 'issuerDetailsSchema',
   },
   {
     id: 'recipient-details',

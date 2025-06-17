@@ -88,6 +88,17 @@ export interface WizardFormData {
       DETTAGLI_MACROAREA?: string;
     }>;
   };
+  issuerDetails?: {
+    DENOMINAZIONE?: string;
+    PIVA?: string;
+    INDIRIZZO_SEDE?: string;
+    CAP_SEDE?: string;
+    COMUNE_SEDE?: string;
+    PROVINCIA_SEDE?: string;
+    REA?: string;
+    PEC?: string;
+    TELEFONO?: string;
+  };
   [key: string]: any; // Allow additional properties
 }
 

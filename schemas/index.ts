@@ -419,3 +419,32 @@ export const additionalServicesSchema = z.object({
 });
 
 export type AdditionalServicesData = z.infer<typeof additionalServicesSchema>;
+
+// Issuer Details validation schema (T24)
+export const issuerDetailsSchema = z.object({
+  DENOMINAZIONE: z.string().min(1, "Company name is required").max(255, "Maximum 255 characters allowed"),
+  PIVA: z.string()
+    .min(11, "VAT number must be at least 11 characters")
+    .max(16, "VAT number must be at most 16 characters")
+    .regex(/^[A-Z0-9]+$/, "Only alphanumeric characters allowed")
+    .refine((val) => val.length === 11 || val.length === 16, {
+      message: "VAT number must be exactly 11 or 16 characters",
+    }),
+  INDIRIZZO_SEDE: z.string().min(1, "Registered office address is required").max(255, "Maximum 255 characters allowed"),
+  CAP_SEDE: z.string()
+    .regex(/^\d{5}$/, "Postal code must be exactly 5 digits"),
+  COMUNE_SEDE: z.string().min(1, "Municipality is required").max(255, "Maximum 255 characters allowed"),
+  PROVINCIA_SEDE: z.string()
+    .length(2, "Province must be exactly 2 characters")
+    .regex(/^[A-Z]{2}$/, "Province must be uppercase letters"),
+  REA: z.string().max(20, "Maximum 20 characters allowed").optional(),
+  PEC: z.string()
+    .email("Invalid email format")
+    .max(100, "Maximum 100 characters allowed"),
+  TELEFONO: z.string()
+    .min(1, "Phone number is required")
+    .max(15, "Maximum 15 characters allowed")
+    .regex(/^[\d\s\+\-\(\)]+$/, "Invalid phone format"),
+});
+
+export type IssuerDetailsData = z.infer<typeof issuerDetailsSchema>;

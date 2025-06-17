@@ -19,8 +19,8 @@ export const formComponents = {
   OfferZonesForm: lazy(() => import('./offer-zones-form').then(mod => ({ default: mod.OfferZonesForm }))),
   DiscountsForm: lazy(() => import('./discounts-form').then(mod => ({ default: mod.DiscountsForm }))),
   AdditionalServicesForm: lazy(() => import('./additional-services-form').then(mod => ({ default: mod.AdditionalServicesForm }))),
+  IssuerDetailsForm: lazy(() => import('./issuer-details-form').then(mod => ({ default: mod.IssuerDetailsForm }))),
   // Add other form components as they are created
-  // IssuerDetailsForm: lazy(() => import('./issuer-details-form').then(mod => ({ default: mod.IssuerDetailsForm }))),
   // RecipientDetailsForm: lazy(() => import('./recipient-details-form').then(mod => ({ default: mod.RecipientDetailsForm }))),
   // etc...
 };

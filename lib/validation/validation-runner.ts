@@ -228,6 +228,12 @@ export const runValidation = async (
       runSchemaValidation('additionalServices', formData.additionalServices, 'additionalServicesSchema')
     );
   }
+  
+  if (formData.issuerDetails) {
+    schemaValidationPromises.push(
+      runSchemaValidation('issuerDetails', formData.issuerDetails, 'issuerDetailsSchema')
+    );
+  }
 
   // Wait for all schema validations to complete
   const schemaValidationResults = await Promise.all(schemaValidationPromises);

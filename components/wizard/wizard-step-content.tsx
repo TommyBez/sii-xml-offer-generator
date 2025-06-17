@@ -54,6 +54,7 @@ export function WizardStepContent({ step, onSubmit }: WizardStepContentProps) {
     'payment-methods': 'paymentMethods',
     'time-bands': 'timeBands',
     'additional-services': 'additionalServices',
+    'issuer-details': 'issuerDetails',
     // Add more mappings as needed
   };
   
