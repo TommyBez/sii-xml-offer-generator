@@ -22,6 +22,7 @@ export const formComponents = {
   IssuerDetailsForm: lazy(() => import('./issuer-details-form').then(mod => ({ default: mod.IssuerDetailsForm }))),
   RecipientDetailsForm: lazy(() => import('./recipient-details-form').then(mod => ({ default: mod.RecipientDetailsForm }))),
   EnergyTypeForm: lazy(() => import('./energy-type-form').then(mod => ({ default: mod.EnergyTypeForm }))),
+  ConsumptionProfileForm: lazy(() => import('./consumption-profile-form').then(mod => ({ default: mod.ConsumptionProfileForm }))),
   // Add other form components as they are created
   // etc...
 };
@@ -46,6 +47,7 @@ export * from './offer-zones-form';
 export * from './discounts-form';
 export * from './additional-services-form';
 export * from './energy-type-form';
+export * from './consumption-profile-form';
 export { OfferValidityForm } from './offer-validity-form';
 export { EnergyPriceReferencesForm } from './energy-price-references-form';
 export { OfferDetailsForm } from './offer-details-form';
@@ -57,4 +59,5 @@ export { ContractualConditionsForm } from './contractual-conditions-form';
 export { OfferZonesForm } from './offer-zones-form';
 export { DiscountsForm } from './discounts-form';
 export { AdditionalServicesForm } from './additional-services-form';
-export { EnergyTypeForm } from './energy-type-form'; 
+export { EnergyTypeForm } from './energy-type-form';
+export { ConsumptionProfileForm } from './consumption-profile-form'; 

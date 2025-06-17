@@ -229,6 +229,72 @@ export const sectionValidators: Record<string, SectionValidator> = {
 
     return errors.length > 0 ? errors : null;
   },
+
+  // Consumption profile validation
+  consumptionProfile: (sectionData: any, context: ValidationContext): ValidationError[] | null => {
+    const errors: ValidationError[] = [];
+    const marketType = context.formData.energyType?.TIPO_MERCATO || context.formData.offerDetails?.TIPO_MERCATO;
+    
+    // Annual consumption is required
+    if (!sectionData?.CONSUMO_ANNUO) {
+      errors.push({
+        field: "CONSUMO_ANNUO",
+        message: "Annual consumption is required",
+        path: ["consumptionProfile", "CONSUMO_ANNUO"]
+      });
+    } else {
+      // Validate consumption range
+      const consumption = Number(sectionData.CONSUMO_ANNUO);
+      if (isNaN(consumption) || consumption < 1 || consumption > 9_999_999) {
+        errors.push({
+          field: "CONSUMO_ANNUO",
+          message: "Annual consumption must be between 1 and 9,999,999",
+          path: ["consumptionProfile", "CONSUMO_ANNUO"]
+        });
+      }
+    }
+    
+    // Validate time band distribution if present (electricity only)
+    if (marketType === "01" && sectionData?.RIPARTIZIONE_FASCE) {
+      const distribution = sectionData.RIPARTIZIONE_FASCE;
+      if (distribution.F1 !== undefined && distribution.F2 !== undefined && distribution.F3 !== undefined) {
+        const sum = distribution.F1 + distribution.F2 + distribution.F3;
+        if (Math.abs(sum - 100) > 0.01) {
+          errors.push({
+            field: "RIPARTIZIONE_FASCE",
+            message: "Time band percentages must sum to 100%",
+            path: ["consumptionProfile", "RIPARTIZIONE_FASCE"]
+          });
+        }
+        
+        // Validate individual band percentages
+        ['F1', 'F2', 'F3'].forEach(band => {
+          const value = distribution[band];
+          if (value < 0 || value > 100) {
+            errors.push({
+              field: `RIPARTIZIONE_FASCE.${band}`,
+              message: `${band} percentage must be between 0 and 100`,
+              path: ["consumptionProfile", "RIPARTIZIONE_FASCE", band]
+            });
+          }
+        });
+      }
+    }
+    
+    // Validate winter percentage if present (gas only)
+    if (marketType === "02" && sectionData?.PERCENTUALE_INVERNALE !== undefined) {
+      const winterPercentage = Number(sectionData.PERCENTUALE_INVERNALE);
+      if (isNaN(winterPercentage) || winterPercentage < 0 || winterPercentage > 100) {
+        errors.push({
+          field: "PERCENTUALE_INVERNALE",
+          message: "Winter percentage must be between 0 and 100",
+          path: ["consumptionProfile", "PERCENTUALE_INVERNALE"]
+        });
+      }
+    }
+
+    return errors.length > 0 ? errors : null;
+  },
 };
 
 // Register all section validators

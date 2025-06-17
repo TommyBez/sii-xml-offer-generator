@@ -63,6 +63,8 @@ export interface WizardFormData {
   energyType?: {
     type?: string;
     includesGreenOptions?: boolean;
+    TIPO_MERCATO?: string;
+    AZIONE?: string;
   };
   consumptionProfile?: any;
   pricingStructure?: any;
@@ -108,6 +110,11 @@ export interface WizardFormData {
     PROVINCIA?: string;
     PARTITA_IVA?: string;
     TELEFONO?: string;
+  };
+  offerDetails?: {
+    TIPO_MERCATO?: string;
+    TIPO_OFFERTA?: string;
+    [key: string]: any;
   };
   [key: string]: any; // Allow additional properties
 }
