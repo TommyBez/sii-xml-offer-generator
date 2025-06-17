@@ -146,5 +146,107 @@
     "title": "XML Preview Component (FR-6.1)",
     "description": "Render generated XML in a syntax-highlighted viewer before download.",
     "dependencies": ["T21"]
+  },
+  {
+    "id": "T23",
+    "title": "Stepperize Integration & Wizard Refactor",
+    "description": "Migrate custom wizard navigation to shadcn-stepper with @stepperize/react integration.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T24",
+    "title": "Issuer Details Form",
+    "description": "Create UI and validation for Issuer (company) details such as company name, address, and registration info.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T25",
+    "title": "Recipient Details Form",
+    "description": "Create UI and validation for recipient/customer company details.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T26",
+    "title": "Energy Type Form",
+    "description": "Collect information on the type of energy service (electricity, gas, dual, green options).",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T27",
+    "title": "Consumption Profile Form",
+    "description": "Collect consumption profile information; depends on Energy Type.",
+    "dependencies": ["T26"]
+  },
+  {
+    "id": "T28",
+    "title": "Pricing Structure Form",
+    "description": "Configure pricing tiers and rates; depends on Energy Type and Consumption Profile.",
+    "dependencies": ["T26","T27"]
+  },
+  {
+    "id": "T29",
+    "title": "Contract Duration Form",
+    "description": "Set contract terms and duration.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T30",
+    "title": "Green Energy Options Form",
+    "description": "Configure renewable energy options; optional step visible when green options selected.",
+    "dependencies": ["T26"]
+  },
+  {
+    "id": "T31",
+    "title": "Network Costs Form",
+    "description": "Collect distribution and transmission cost details.",
+    "dependencies": ["T26"]
+  },
+  {
+    "id": "T32",
+    "title": "Taxes & Fees Form",
+    "description": "Configure applicable taxes and regulatory fees.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T33",
+    "title": "Payment Terms Form",
+    "description": "Define payment schedules and terms; depends on Payment Methods Form.",
+    "dependencies": ["T11"]
+  },
+  {
+    "id": "T34",
+    "title": "Meter Reading Form",
+    "description": "Set meter reading schedules and input methods; depends on Energy Type.",
+    "dependencies": ["T26"]
+  },
+  {
+    "id": "T35",
+    "title": "Connection Details Form",
+    "description": "Collect power connection specifications; depends on Energy Type.",
+    "dependencies": ["T26"]
+  },
+  {
+    "id": "T36",
+    "title": "Service Level Form",
+    "description": "Configure customer service and support levels.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T37",
+    "title": "Special Conditions Form",
+    "description": "Capture special terms or conditions of the offer.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T38",
+    "title": "Regulatory Compliance Form",
+    "description": "Ensure compliance data input for regulatory requirements.",
+    "dependencies": ["T02"]
+  },
+  {
+    "id": "T39",
+    "title": "Summary & Review Step",
+    "description": "Aggregate and display all collected data for final review before XML generation.",
+    "dependencies": ["T03","T24","T25","T26","T28","T11"]
   }
 ]
