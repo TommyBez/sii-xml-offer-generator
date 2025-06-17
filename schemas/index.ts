@@ -472,3 +472,23 @@ export const recipientDetailsSchema = z.object({
 });
 
 export type RecipientDetailsData = z.infer<typeof recipientDetailsSchema>;
+
+// Energy Type validation schema (T26)
+export const energyTypeSchema = z.object({
+  TIPO_MERCATO: z
+    .enum(['01', '02', '03'], {
+      required_error: 'Market type selection is required',
+    })
+    .describe('Market type: 01 Electricity / 02 Gas / 03 Dual Fuel'),
+  INCLUDE_GREEN_OPTIONS: z
+    .boolean()
+    .default(false)
+    .describe('Whether to include green energy options'),
+  AZIONE: z
+    .enum(['INSERIMENTO', 'AGGIORNAMENTO'], {
+      required_error: 'Action type is required',
+    })
+    .describe('Action type for file name generation'),
+});
+
+export type EnergyTypeData = z.infer<typeof energyTypeSchema>;
