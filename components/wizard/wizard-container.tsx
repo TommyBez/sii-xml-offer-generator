@@ -64,6 +64,17 @@ const getDefaultFormValues = (existingData: Partial<WizardFormData>): Partial<Wi
       phone: '',
       ...existingData.recipient,
     },
+    recipientDetails: {
+      RAGIONE_SOCIALE: '',
+      CODICE_FISCALE: '',
+      INDIRIZZO: '',
+      CAP: '',
+      COMUNE: '',
+      PROVINCIA: '',
+      PARTITA_IVA: '',
+      TELEFONO: '',
+      ...existingData.recipientDetails,
+    },
     items: existingData.items || [],
     ...existingData,
   };

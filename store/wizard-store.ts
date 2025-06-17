@@ -99,6 +99,16 @@ export interface WizardFormData {
     PEC?: string;
     TELEFONO?: string;
   };
+  recipientDetails?: {
+    RAGIONE_SOCIALE?: string;
+    CODICE_FISCALE?: string;
+    INDIRIZZO?: string;
+    CAP?: string;
+    COMUNE?: string;
+    PROVINCIA?: string;
+    PARTITA_IVA?: string;
+    TELEFONO?: string;
+  };
   [key: string]: any; // Allow additional properties
 }
 

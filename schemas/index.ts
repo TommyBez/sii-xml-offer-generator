@@ -448,3 +448,27 @@ export const issuerDetailsSchema = z.object({
 });
 
 export type IssuerDetailsData = z.infer<typeof issuerDetailsSchema>;
+
+// Recipient Details validation schema (T25)
+export const recipientDetailsSchema = z.object({
+  RAGIONE_SOCIALE: z.string().min(1, "Company name is required").max(255, "Maximum 255 characters allowed"),
+  CODICE_FISCALE: z.string()
+    .length(16, "Fiscal code must be exactly 16 characters")
+    .regex(/^[A-Z0-9]+$/, "Only alphanumeric characters allowed"),
+  INDIRIZZO: z.string().min(1, "Address is required").max(255, "Maximum 255 characters allowed"),
+  CAP: z.string()
+    .regex(/^\d{5}$/, "Postal code must be exactly 5 digits"),
+  COMUNE: z.string().min(1, "Municipality is required").max(255, "Maximum 255 characters allowed"),
+  PROVINCIA: z.string()
+    .length(2, "Province must be exactly 2 characters")
+    .regex(/^[A-Z]{2}$/, "Province must be uppercase letters"),
+  PARTITA_IVA: z.string()
+    .regex(/^[A-Z0-9]{11,16}$/, "VAT number must be 11-16 alphanumeric characters")
+    .optional(),
+  TELEFONO: z.string()
+    .max(15, "Maximum 15 characters allowed")
+    .regex(/^[\d\s\+\-\(\)]*$/, "Invalid phone format")
+    .optional(),
+});
+
+export type RecipientDetailsData = z.infer<typeof recipientDetailsSchema>;

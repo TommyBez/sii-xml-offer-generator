@@ -173,7 +173,7 @@ export const wizardSteps: WizardStepConfig[] = [
     title: 'Recipient Details',
     description: 'Customer or recipient company information',
     component: 'RecipientDetailsForm',
-    validation: 'companySchema',
+    validation: 'recipientDetailsSchema',
   },
   {
     id: 'energy-type',
