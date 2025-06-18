@@ -492,3 +492,100 @@ export const energyTypeSchema = z.object({
 });
 
 export type EnergyTypeData = z.infer<typeof energyTypeSchema>;
+
+// Consumption Profile validation schema (T27)
+export const consumptionProfileSchema = z.object({
+  CONSUMO_ANNUO: z
+    .number({
+      required_error: 'Annual consumption is required',
+      invalid_type_error: 'Annual consumption must be a number',
+    })
+    .int('Annual consumption must be a whole number')
+    .min(1, 'Annual consumption must be at least 1')
+    .max(9_999_999, 'Annual consumption cannot exceed 9,999,999'),
+  
+  RIPARTIZIONE_FASCE: z
+    .object({
+      F1: z.number().min(0).max(100),
+      F2: z.number().min(0).max(100),
+      F3: z.number().min(0).max(100),
+    })
+    .optional()
+    .refine(
+      (v: { F1: number; F2: number; F3: number } | undefined) => {
+        if (!v) return true;
+        const sum = v.F1 + v.F2 + v.F3;
+        return Math.abs(sum - 100) < 0.01; // Allow for small floating point errors
+      },
+      {
+        message: 'Time band percentages must sum to 100%',
+      }
+    ),
+  
+  PERCENTUALE_INVERNALE: z
+    .number()
+    .min(0, 'Winter percentage must be at least 0%')
+    .max(100, 'Winter percentage cannot exceed 100%')
+    .optional(),
+});
+
+export type ConsumptionProfileData = z.infer<typeof consumptionProfileSchema>;
+
+// Pricing Structure validation schema (T28)
+export const pricingTierSchema = z.object({
+  DA_CONSUMO: z.number().min(0, 'Lower bound must be non-negative'),
+  A_CONSUMO: z.number().optional(),
+  FASCIA: z.string().optional(),
+  PREZZO: z.number().multipleOf(0.000001, 'Price must have maximum 6 decimal places'),
+  UNITA_MISURA: z.enum(['EUR_KWH', 'EUR_SMC', 'EUR_KW', 'EUR_YEAR'], {
+    required_error: 'Unit of measure is required',
+  }),
+}).refine(
+  (data) => {
+    if (data.A_CONSUMO !== undefined && data.A_CONSUMO <= data.DA_CONSUMO) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: 'Upper bound must be greater than lower bound',
+    path: ['A_CONSUMO'],
+  }
+);
+
+export const pricingStructureSchema = z.object({
+  tiers: z
+    .array(pricingTierSchema)
+    .min(1, 'At least one pricing tier is required')
+    .refine(
+      (tiers) => {
+        // Check for gaps and overlaps in consumption ranges
+        const sortedTiers = [...tiers].sort((a, b) => a.DA_CONSUMO - b.DA_CONSUMO);
+        
+        for (let i = 0; i < sortedTiers.length - 1; i++) {
+          const current = sortedTiers[i];
+          const next = sortedTiers[i + 1];
+          
+          // If current tier has an upper bound, check for gaps/overlaps
+          if (current.A_CONSUMO !== undefined) {
+            if (current.A_CONSUMO < next.DA_CONSUMO) {
+              return false; // Gap
+            }
+            if (current.A_CONSUMO > next.DA_CONSUMO) {
+              return false; // Overlap
+            }
+          }
+        }
+        return true;
+      },
+      {
+        message: 'Consumption ranges must be consecutive with no gaps or overlaps',
+      }
+    ),
+  TIPO_PREZZO: z.enum(['MONORARIO', 'MULTIORARIO'], {
+    required_error: 'Price type is required',
+  }),
+});
+
+export type PricingTierData = z.infer<typeof pricingTierSchema>;
+export type PricingStructureData = z.infer<typeof pricingStructureSchema>;
