@@ -101,12 +101,6 @@ const { trigger } = useFormContext();
 ### 3.6 Remove legacy validation hook
 If `hooks/use-form-validation.ts` only synced validation into store, delete it and remove imports.
 
-### 3.7 Regression test
-Run storybook or `next dev`; navigate through wizard; ensure:
-* Next button disabled until current step valid.
-* Metadata badges update in Stepper nav.
-* Form data still persists via Zustand.
-
 ---
 
 ## 4. Acceptance Criteria
@@ -114,7 +108,6 @@ Run storybook or `next dev`; navigate through wizard; ensure:
 - [ ] Submit flows call `stepper.next()` / `prev()` exclusively.
 - [ ] `metadata.isValid` and `completed` are written.
 - [ ] `use-form-validation.ts` removed or repurposed.
-- [ ] All unit tests & e2e wizard flows pass.
 
 ---
 
