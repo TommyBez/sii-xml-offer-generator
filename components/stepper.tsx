@@ -2,9 +2,17 @@ import { Slot } from "@radix-ui/react-slot";
 import * as Stepperize from "@stepperize/react";
 import { type VariantProps, cva } from "class-variance-authority";
 import * as React from "react";
+import { Circle, CheckCircle, Lock, AlertCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const StepperContext = React.createContext<StepperConfigProps | null>(null);
 
@@ -55,7 +63,6 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
         className,
         initialStep,
         initialMetadata,
-        onStepChange,
         ...divProps
       }) => {
         return (
@@ -65,7 +72,6 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
             <Scoped
               initialStep={initialStep}
               initialMetadata={initialMetadata}
-              onStepChange={onStepChange}
             >
               <StepperContainer className={className} {...divProps}>
                 {children}
@@ -499,6 +505,202 @@ export interface CircleStepIndicatorProps {
   strokeWidth?: number;
 }
 
+// Status type for steps
+export type StepStatus = 'completed' | 'active' | 'locked' | 'incomplete';
+
+// Helper function to get step status
+export const getStatus = (step: any, currentStep: any, metadata?: any): StepStatus => {
+  if (step.id === currentStep.id) {
+    return 'active';
+  }
+  
+  // Check if step is completed based on metadata or other logic
+  if (metadata?.completed?.has?.(step.id)) {
+    return 'completed';
+  }
+  
+  // Check if step is accessible (not locked)
+  if (metadata?.accessible?.has?.(step.id) === false) {
+    return 'locked';
+  }
+  
+  return 'incomplete';
+};
+
+// Circle index component for step indicators
+interface CircleIndexProps {
+  index: number;
+  status: StepStatus;
+  className?: string;
+}
+
+const CircleIndex: React.FC<CircleIndexProps> = ({ index, status, className }) => {
+  const getIcon = () => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="h-5 w-5" />;
+      case 'active':
+        return <Circle className="h-5 w-5 fill-current" />;
+      case 'locked':
+        return <Lock className="h-4 w-4" />;
+      case 'incomplete':
+      default:
+        return <span className="text-sm font-medium">{index}</span>;
+    }
+  };
+
+  return (
+    <div className={cn("flex items-center justify-center", className)}>
+      {getIcon()}
+    </div>
+  );
+};
+
+// Wizard step tooltip component
+interface WizardStepTooltipProps {
+  step: any;
+  status?: StepStatus;
+}
+
+const WizardStepTooltip: React.FC<WizardStepTooltipProps> = ({ step, status }) => {
+  const getTooltipContent = () => {
+    switch (status) {
+      case 'completed':
+        return `${step.label || step.title} - Completed`;
+      case 'active':
+        return `${step.label || step.title} - Current step`;
+      case 'locked':
+        return `${step.label || step.title} - Complete previous steps to unlock`;
+      case 'incomplete':
+      default:
+        return `${step.label || step.title} - Not yet started`;
+    }
+  };
+
+  return (
+    <div className="max-w-xs">
+      <div className="font-medium">{step.label || step.title}</div>
+      {step.description && (
+        <div className="text-sm text-muted-foreground mt-1">{step.description}</div>
+      )}
+      <div className="text-xs text-muted-foreground mt-1 opacity-75">
+        {getTooltipContent()}
+      </div>
+    </div>
+  );
+};
+
+// Enhanced WizardStepper component
+interface WizardStepperProps {
+  variant?: 'horizontal' | 'mobile';
+  className?: string;
+  showTooltips?: boolean;
+  metadata?: {
+    completed?: Set<string>;
+    accessible?: Set<string>;
+  };
+  stepper: any; // Pass stepper instance as prop
+}
+
+export const WizardStepper: React.FC<WizardStepperProps> = ({ 
+  variant = 'horizontal', 
+  className,
+  showTooltips = true,
+  metadata,
+  stepper
+}) => {
+  if (!stepper) {
+    console.warn('WizardStepper requires a stepper instance');
+    return null;
+  }
+
+  const StepButton = ({ step, idx }: { step: any; idx: number }) => {
+    const status = getStatus(step, stepper.current, metadata);
+    const isDisabled = status === 'locked';
+    
+    const stepButton = (
+      <stepper.Stepper.Step
+        key={step.id}
+        of={step.id}
+        disabled={isDisabled}
+        icon={<CircleIndex index={idx + 1} status={status} />}
+        onClick={() => !isDisabled && stepper.goTo?.(step.id)}
+        className={cn(
+          "transition-all duration-200",
+          status === 'active' && "ring-2 ring-primary ring-offset-2",
+          status === 'completed' && "bg-primary/10 hover:bg-primary/20",
+          status === 'locked' && "opacity-50 cursor-not-allowed",
+          "hover:scale-105"
+        )}
+      >
+        <stepper.Stepper.Title className={cn(
+          status === 'active' && "font-semibold text-primary",
+          status === 'completed' && "text-primary",
+          status === 'locked' && "text-muted-foreground"
+        )}>
+          {step.label || step.title}
+        </stepper.Stepper.Title>
+      </stepper.Stepper.Step>
+    );
+
+    if (!showTooltips) {
+      return stepButton;
+    }
+
+    return (
+      <Tooltip key={step.id}>
+        <TooltipTrigger asChild>
+          {stepButton}
+        </TooltipTrigger>
+        <TooltipContent side="bottom" align="center">
+          <WizardStepTooltip step={step} status={status} />
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
+  if (variant === 'mobile') {
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="sm" className="md:hidden">
+            <span>Step {stepper.all.findIndex((s: any) => s.id === stepper.current.id) + 1} of {stepper.all.length}</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-80">
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-4">Navigation</h3>
+            <TooltipProvider>
+              <stepper.Stepper.Navigation className="flex flex-col space-y-2">
+                {stepper.all.map((step: any, idx: number) => (
+                  <StepButton key={step.id} step={step} idx={idx} />
+                ))}
+              </stepper.Stepper.Navigation>
+            </TooltipProvider>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <stepper.Stepper.Navigation 
+        className={cn(
+          "flex overflow-x-auto scrollbar-hide",
+          "border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+          "px-4 py-2",
+          className
+        )}
+      >
+        {stepper.all.map((step: any, idx: number) => (
+          <StepButton key={step.id} step={step} idx={idx} />
+        ))}
+      </stepper.Stepper.Navigation>
+    </TooltipProvider>
+  );
+};
+
 export type StepperDefineProps<Steps extends Stepperize.Step[]> = Omit<
   Stepperize.StepperReturn<Steps>,
   "Scoped"
@@ -533,4 +735,4 @@ type AsChildProps<T extends React.ElementType> = React.ComponentProps<T> & {
   asChild?: boolean;
 };
 
-export { defineStepper };
+export { defineStepper, WizardStepper };
