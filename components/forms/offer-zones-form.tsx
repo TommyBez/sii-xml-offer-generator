@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { useState, useMemo, useCallback } from 'react';
 import { Search, MapPin, Building2, Home, X } from 'lucide-react';
 import { cn } from '@/lib/utils';

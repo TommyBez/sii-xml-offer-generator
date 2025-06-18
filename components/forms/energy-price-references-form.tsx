@@ -17,8 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { energyPriceReferencesSchema, type EnergyPriceReferencesData } from '@/schemas';
-import { useWizardStore } from '@/store/wizard-store';
-
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
 interface EnergyPriceReferencesFormProps {
   initialData?: Partial<EnergyPriceReferencesData>;
   onSubmit?: (data: EnergyPriceReferencesData) => void;
@@ -81,7 +80,7 @@ export function EnergyPriceReferencesForm({ initialData, onSubmit }: EnergyPrice
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
             <h3 className="text-lg font-medium text-gray-900">Energy Price References</h3>
@@ -183,6 +182,11 @@ export function EnergyPriceReferencesForm({ initialData, onSubmit }: EnergyPrice
               )}
             />
           )}
+        </div>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
         </div>
       </form>
     </Form>

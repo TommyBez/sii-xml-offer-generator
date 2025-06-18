@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { z } from 'zod';
 import { discountsSchema } from '@/schemas';
 import {
@@ -32,7 +33,7 @@ import {
 } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
 import { Plus, Trash2, Percent } from 'lucide-react';
-import { useWizardStore } from '@/store/wizard-store';
+
 import { Label } from '@/components/ui/label';
 
 // Component/Band codes
@@ -117,10 +118,9 @@ interface Sconto {
   PREZZISconto: PrezzoSconto[];
 }
 
-
-
 interface DiscountsFormProps {
-  onSubmit: (data: z.infer<typeof discountsSchema>) => void;
+  onSubmit?: (data: z.infer<typeof DiscountsFormSchema>) => void;
+  initialData?: z.infer<typeof DiscountsFormSchema>;
 }
 
 // Component/Band Selector
@@ -498,8 +498,15 @@ function DiscountPrices({
   );
 }
 
-export function DiscountsForm({ onSubmit }: DiscountsFormProps) {
-  const form = useFormContext();
+export function DiscountsForm({ onSubmit: externalOnSubmit, initialData }: DiscountsFormProps) {
+  const form = useWizardStepForm<typeof DiscountsFormSchema>();
+
+  const handleSubmit = form.onSubmit(async (data) => {
+    // Call external onSubmit if provided
+    if (externalOnSubmit) {
+      await externalOnSubmit(data);
+    }
+  });
   const formData = useWizardStore((state) => state.formData);
   const marketType = formData?.offerDetails?.TIPO_MERCATO;
   

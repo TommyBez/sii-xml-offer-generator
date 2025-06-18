@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -61,7 +63,8 @@ interface DualOfferField {
 }
 
 interface DualOffersFormProps {
-  onSubmit: (data: z.infer<typeof dualOffersSchema>) => void;
+  onSubmit?: (data: z.infer<typeof dualOffersSchema>) => void;
+  initialData?: z.infer<typeof dualOffersSchema>;
 }
 
 const DynamicOfferList = ({ 
@@ -75,8 +78,8 @@ const DynamicOfferList = ({
   placeholder: string;
   description: string;
 }) => {
-  const form = useFormContext();
-  const existingValues = form.watch(fieldName) || [];
+  const { control, watch, setValue } = useFormContext();
+  const existingValues = watch(fieldName) || [];
   
   // Initialize offers from form state
   const [offers, setOffers] = useState<DualOfferField[]>(() => {
@@ -96,7 +99,7 @@ const DynamicOfferList = ({
       setOffers(newOffers);
       // Update form values
       const values = newOffers.map(o => o.value).filter(v => v !== '');
-      form.setValue(fieldName, values);
+      setValue(fieldName, values);
     }
   };
 
@@ -111,12 +114,12 @@ const DynamicOfferList = ({
     
     // Update form values
     const values = newOffers.map(o => o.value).filter(v => v !== '');
-    form.setValue(fieldName, values);
+    setValue(fieldName, values);
   };
 
   return (
     <FormField
-      control={form.control}
+      control={control}
       name={fieldName}
       render={({ field, fieldState }) => (
         <FormItem>
@@ -171,17 +174,25 @@ const DynamicOfferList = ({
   );
 };
 
-export function DualOffersForm({ onSubmit }: DualOffersFormProps) {
-  const form = useFormContext();
+export function DualOffersForm({ onSubmit: externalOnSubmit, initialData }: DualOffersFormProps) {
+  const form = useWizardStepForm<typeof dualOffersSchema>();
+
+  const handleSubmit = form.onSubmit(async (data) => {
+    // Call external onSubmit if provided
+    if (externalOnSubmit) {
+      await externalOnSubmit(data);
+    }
+  });
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+    <Form {...form}>
+      <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-6">
         <div className="rounded-lg border p-6 bg-muted/50">
           <h3 className="text-lg font-semibold mb-4">Linked Electricity Offers</h3>
           <DynamicOfferList
             type="Electricity"
-            fieldName="dualOffers.OFFERTE_CONGIUNTE_EE"
+            fieldName="OFFERTE_CONGIUNTE_EE"
             placeholder="Electricity offer code"
             description="List the electricity offer codes that are part of this dual fuel package. Each code can be up to 32 characters (letters and numbers only)."
           />
@@ -191,7 +202,7 @@ export function DualOffersForm({ onSubmit }: DualOffersFormProps) {
           <h3 className="text-lg font-semibold mb-4">Linked Gas Offers</h3>
           <DynamicOfferList
             type="Gas"
-            fieldName="dualOffers.OFFERTE_CONGIUNTE_GAS"
+            fieldName="OFFERTE_CONGIUNTE_GAS"
             placeholder="Gas offer code"
             description="List the gas offer codes that are part of this dual fuel package. Each code can be up to 32 characters (letters and numbers only)."
           />
@@ -204,6 +215,12 @@ export function DualOffersForm({ onSubmit }: DualOffersFormProps) {
           You must specify at least one electricity and one gas offer code that make up this combined package.
         </p>
       </div>
-    </form>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 } 

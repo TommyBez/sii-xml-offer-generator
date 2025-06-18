@@ -15,7 +15,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
-import { useWizardStore } from '@/store/wizard-store';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { offerCharacteristicsSchema, type OfferCharacteristicsData } from '@/schemas';
 
 interface OfferCharacteristicsFormProps {
@@ -136,7 +137,7 @@ export function OfferCharacteristicsForm({ initialData, onSubmit }: OfferCharact
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Consumption Fields - Required for FLAT offers */}
         {showConsumption && (
           <div className="space-y-4">
@@ -303,6 +304,11 @@ export function OfferCharacteristicsForm({ initialData, onSubmit }: OfferCharact
             )}
           </div>
         )}
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
+        </div>
       </form>
     </Form>
   );

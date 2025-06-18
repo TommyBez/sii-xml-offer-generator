@@ -19,8 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { issuerDetailsSchema, type IssuerDetailsData } from '@/schemas';
-import { useWizardStore } from '@/store/wizard-store';
-
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
 interface IssuerDetailsFormProps {
   initialData?: Partial<IssuerDetailsData>;
   onSubmit?: (data: IssuerDetailsData) => void;
@@ -151,7 +150,7 @@ export function IssuerDetailsForm({ initialData, onSubmit }: IssuerDetailsFormPr
       </Alert>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
           {/* Company Information */}
           <Card>
             <CardHeader>
@@ -466,6 +465,11 @@ export function IssuerDetailsForm({ initialData, onSubmit }: IssuerDetailsFormPr
               )}
             </div>
           </div>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
+        </div>
         </form>
       </Form>
     </motion.div>

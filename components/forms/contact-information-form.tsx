@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useWizardStore } from '@/store/wizard-store';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -257,7 +258,7 @@ export function ContactInformationForm({ initialData, onSubmit }: ContactInforma
   
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Contact Information</h3>
           <p className="text-sm text-muted-foreground">
@@ -353,6 +354,11 @@ export function ContactInformationForm({ initialData, onSubmit }: ContactInforma
             </FormItem>
           )}
         />
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
+        </div>
       </form>
     </Form>
   );

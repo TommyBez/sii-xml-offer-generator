@@ -19,7 +19,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Info } from 'lucide-react';
 import { regulatedComponentsSchema, type RegulatedComponentsData } from '@/schemas';
-import { useWizardStore } from '@/store/wizard-store';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { cn } from '@/lib/utils';
 
 interface RegulatedComponentsFormProps {
@@ -160,7 +161,7 @@ export function RegulatedComponentsForm({ initialData, onSubmit }: RegulatedComp
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold">Regulated Components</h3>
@@ -270,6 +271,11 @@ export function RegulatedComponentsForm({ initialData, onSubmit }: RegulatedComp
             <Info className="w-4 h-4" />
             <span>Optional components based on commercial strategy</span>
           </div>
+        </div>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
         </div>
       </form>
     </Form>

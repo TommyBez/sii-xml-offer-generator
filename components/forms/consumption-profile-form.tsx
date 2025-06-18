@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { z } from 'zod';
-import { useWizardStore } from '@/store/wizard-store';
+
 import {
   FormControl,
   FormDescription,
@@ -82,9 +83,16 @@ const DEFAULT_TIME_BANDS = {
   F3: 34,
 };
 
-export function ConsumptionProfileForm({ onSubmit: _onSubmit }: ConsumptionProfileFormProps) {
-  const form = useFormContext();
-  const updateFormData = useWizardStore((state: any) => state.updateFormData);
+export function ConsumptionProfileForm({ onSubmit: externalOnSubmit, initialData }: ConsumptionProfileFormProps) {
+  const form = useWizardStepForm<typeof ConsumptionProfileFormSchema>();
+
+  const handleSubmit = form.onSubmit(async (data) => {
+    // Call external onSubmit if provided
+    if (externalOnSubmit) {
+      await externalOnSubmit(data);
+    }
+  });
+  
   const formData = useWizardStore((state: any) => state.formData);
   
   // Get market type from energy type or offer details
@@ -249,7 +257,7 @@ export function ConsumptionProfileForm({ onSubmit: _onSubmit }: ConsumptionProfi
         <CardContent className="space-y-4">
           <FormField
             control={form.control}
-            name="consumptionProfile.CONSUMO_ANNUO"
+            name="CONSUMO_ANNUO"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center justify-between">
@@ -343,7 +351,7 @@ export function ConsumptionProfileForm({ onSubmit: _onSubmit }: ConsumptionProfi
             <CardContent className="space-y-6">
               <FormField
                 control={form.control}
-                name="consumptionProfile.RIPARTIZIONE_FASCE"
+                name="RIPARTIZIONE_FASCE"
                 render={({ field }) => {
                   const currentDistribution = field.value || DEFAULT_TIME_BANDS;
                   
@@ -459,7 +467,7 @@ export function ConsumptionProfileForm({ onSubmit: _onSubmit }: ConsumptionProfi
           <CardContent>
             <FormField
               control={form.control}
-              name="consumptionProfile.PERCENTUALE_INVERNALE"
+              name="PERCENTUALE_INVERNALE"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Winter Consumption Percentage</FormLabel>

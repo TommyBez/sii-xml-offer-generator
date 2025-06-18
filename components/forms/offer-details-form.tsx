@@ -19,8 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { offerDetailsSchema, type OfferDetailsData } from '@/schemas';
-import { useWizardStore } from '@/store/wizard-store';
-
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
 interface OfferDetailsFormProps {
   initialData?: Partial<OfferDetailsData>;
   onSubmit?: (data: OfferDetailsData) => void;
@@ -84,7 +83,7 @@ export function OfferDetailsForm({ initialData, onSubmit }: OfferDetailsFormProp
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Market Type */}
         <FormField
           control={form.control}
@@ -395,6 +394,11 @@ export function OfferDetailsForm({ initialData, onSubmit }: OfferDetailsFormProp
             </FormItem>
           )}
         />
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
+        </div>
       </form>
     </Form>
   );

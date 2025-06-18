@@ -19,8 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { recipientDetailsSchema, type RecipientDetailsData } from '@/schemas';
-import { useWizardStore } from '@/store/wizard-store';
-
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
 interface RecipientDetailsFormProps {
   initialData?: Partial<RecipientDetailsData>;
   onSubmit?: (data: RecipientDetailsData) => void;
@@ -138,7 +137,7 @@ export function RecipientDetailsForm({ initialData, onSubmit }: RecipientDetails
       </Alert>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
           {/* Company Information */}
           <Card>
             <CardHeader>
@@ -406,6 +405,11 @@ export function RecipientDetailsForm({ initialData, onSubmit }: RecipientDetails
               />
             </CardContent>
           </Card>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
+        </div>
         </form>
       </Form>
     </div>

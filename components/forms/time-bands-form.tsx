@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { z } from 'zod';
 import {
   Form,
@@ -23,7 +24,6 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Plus, Trash2, Clock } from 'lucide-react';
-import { useWizardStore } from '@/store/wizard-store';
 
 // Time band options
 const timeBandOptions = [
@@ -116,7 +116,8 @@ export const timeBandsSchema = z.object({
 });
 
 interface TimeBandsFormProps {
-  onSubmit: (data: z.infer<typeof timeBandsSchema>) => void;
+  onSubmit?: (data: z.infer<typeof TimeBandsFormSchema>) => void;
+  initialData?: z.infer<typeof TimeBandsFormSchema>;
 }
 
 // Time band editor component
@@ -404,8 +405,15 @@ function DispatchingComponentEditor({
   );
 }
 
-export function TimeBandsForm({ onSubmit }: TimeBandsFormProps) {
-  const form = useFormContext();
+export function TimeBandsForm({ onSubmit: externalOnSubmit, initialData }: TimeBandsFormProps) {
+  const form = useWizardStepForm<typeof TimeBandsFormSchema>();
+
+  const handleSubmit = form.onSubmit(async (data) => {
+    // Call external onSubmit if provided
+    if (externalOnSubmit) {
+      await externalOnSubmit(data);
+    }
+  });
   const formData = useWizardStore((state) => state.formData);
   const [showWeeklyBands, setShowWeeklyBands] = useState(false);
   const [dispatchingComponents, setDispatchingComponents] = useState<Array<{
@@ -472,7 +480,7 @@ export function TimeBandsForm({ onSubmit }: TimeBandsFormProps) {
         <CardContent>
           <FormField
             control={form.control}
-            name="timeBands.TIPOLOGIA_FASCE"
+            name="TIPOLOGIA_FASCE"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Time Band Type</FormLabel>

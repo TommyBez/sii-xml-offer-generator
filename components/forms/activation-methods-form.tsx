@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useWizardStore } from '@/store/wizard-store';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { activationMethodsSchema, type ActivationMethodsData } from '@/schemas';
 import {
   Form,
@@ -34,19 +35,9 @@ const activationOptions = [
   { value: "99", label: "Other", description: "Specify custom activation method below" },
 ];
 
-export function ActivationMethodsForm({ initialData, onSubmit }: ActivationMethodsFormProps) {
-  const { updateFormData, formData } = useWizardStore();
+export function ActivationMethodsForm({ initialData, onSubmit: externalOnSubmit }: ActivationMethodsFormProps) {
+  const form = useWizardStepForm<typeof activationMethodsSchema>();
   const [showDescription, setShowDescription] = useState(false);
-  
-  const form = useForm<ActivationMethodsData>({
-    resolver: zodResolver(activationMethodsSchema),
-    defaultValues: {
-      MODALITA: [],
-      DESCRIZIONE: "",
-      ...initialData,
-      ...(formData?.activationMethods || {}),
-    },
-  });
 
   const watchedModalita = form.watch('MODALITA');
   const watchedDescrizione = form.watch('DESCRIZIONE');
@@ -56,25 +47,19 @@ export function ActivationMethodsForm({ initialData, onSubmit }: ActivationMetho
     setShowDescription(watchedModalita.includes('99'));
   }, [watchedModalita]);
 
-  // Save form data to store on change
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      updateFormData('activationMethods', value);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, updateFormData]);
-
-  const handleFormSubmit = (data: ActivationMethodsData) => {
-    updateFormData('activationMethods', data);
-    onSubmit?.(data);
-  };
+  const handleSubmit = form.onSubmit(async (data) => {
+    // Call external onSubmit if provided
+    if (externalOnSubmit) {
+      await externalOnSubmit(data);
+    }
+  });
 
   const characterCount = watchedDescrizione?.length || 0;
   const maxCharacters = 2000;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold mb-2">Activation Methods</h3>
@@ -195,9 +180,11 @@ export function ActivationMethodsForm({ initialData, onSubmit }: ActivationMetho
           </AnimatePresence>
         </div>
 
-        <button type="submit" className="hidden" aria-hidden="true">
-          Submit
-        </button>
+        <div className="flex justify-end">
+          <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2" disabled={!form.formState.isValid}>
+            Continue
+          </button>
+        </div>
       </form>
     </Form>
   );

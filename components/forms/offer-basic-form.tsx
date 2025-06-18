@@ -1,7 +1,5 @@
 'use client';
 
-import { useFormContext } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   Form,
@@ -21,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
 
 // Validation schema for basic offer information
 export const offerBasicSchema = z.object({
@@ -41,30 +40,182 @@ export const offerBasicSchema = z.object({
 });
 
 interface OfferBasicFormProps {
-  onSubmit: (data: z.infer<typeof offerBasicSchema>) => void;
+  onSubmit?: (data: z.infer<typeof offerBasicSchema>) => void;
+  initialData?: z.infer<typeof offerBasicSchema>;
 }
 
-export function OfferBasicForm({ onSubmit }: OfferBasicFormProps) {
-  const form = useFormContext();
+export function OfferBasicForm({ onSubmit: externalOnSubmit, initialData }: OfferBasicFormProps) {
+  const form = useWizardStepForm<typeof offerBasicSchema>();
+
+  const handleSubmit = form.onSubmit(async (data) => {
+    // Call external onSubmit if provided
+    if (externalOnSubmit) {
+      await externalOnSubmit(data);
+    }
+  });
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
+    <Form {...form}>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="offerNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Offer Number</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="OFF-2024-001" 
+                    {...field} 
+                    value={field.value || ''} // Ensure controlled input
+                  />
+                </FormControl>
+                <FormDescription>
+                  Unique identifier for this offer
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="currency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Currency</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || 'EUR'}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="EUR">EUR - Euro</SelectItem>
+                    <SelectItem value="USD">USD - US Dollar</SelectItem>
+                    <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                    <SelectItem value="CHF">CHF - Swiss Franc</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Currency for all prices in this offer
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Offer Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, 'PPP')
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date < new Date(new Date().setHours(0, 0, 0, 0))
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Date when this offer is issued
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="validUntil"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Valid Until</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, 'PPP')
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        tomorrow.setHours(0, 0, 0, 0);
+                        return date < tomorrow;
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Expiration date for this offer
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
-          name="offer-basic.offerNumber"
+          name="paymentTerms"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Offer Number</FormLabel>
+              <FormLabel>Payment Terms</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="OFF-2024-001" 
-                  {...field} 
+                <Textarea
+                  placeholder="e.g., Net 30 days, 2% discount if paid within 10 days"
+                  className="resize-none"
+                  {...field}
                   value={field.value || ''} // Ensure controlled input
                 />
               </FormControl>
               <FormDescription>
-                Unique identifier for this offer
+                Payment conditions and terms for this offer
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -73,25 +224,20 @@ export function OfferBasicForm({ onSubmit }: OfferBasicFormProps) {
 
         <FormField
           control={form.control}
-          name="offer-basic.currency"
+          name="deliveryTerms"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Currency</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value || 'EUR'}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="EUR">EUR - Euro</SelectItem>
-                  <SelectItem value="USD">USD - US Dollar</SelectItem>
-                  <SelectItem value="GBP">GBP - British Pound</SelectItem>
-                  <SelectItem value="CHF">CHF - Swiss Franc</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormLabel>Delivery Terms</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="e.g., FOB, EXW, DDP..."
+                  className="resize-none"
+                  {...field}
+                  value={field.value || ''} // Ensure controlled input
+                />
+              </FormControl>
               <FormDescription>
-                Currency for all prices in this offer
+                Delivery conditions and incoterms
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -100,164 +246,33 @@ export function OfferBasicForm({ onSubmit }: OfferBasicFormProps) {
 
         <FormField
           control={form.control}
-          name="offer-basic.date"
+          name="notes"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Offer Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, 'PPP')
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date(new Date().setHours(0, 0, 0, 0))
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            <FormItem>
+              <FormLabel>Additional Notes</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Any additional information or special conditions..."
+                  className="resize-none"
+                  rows={4}
+                  {...field}
+                  value={field.value || ''} // Ensure controlled input
+                />
+              </FormControl>
               <FormDescription>
-                Date when this offer is issued
+                Optional notes or special conditions for this offer
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="offer-basic.validUntil"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Valid Until</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, 'PPP')
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => {
-                      const tomorrow = new Date();
-                      tomorrow.setDate(tomorrow.getDate() + 1);
-                      tomorrow.setHours(0, 0, 0, 0);
-                      return date < tomorrow;
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                Expiration date for this offer
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <FormField
-        control={form.control}
-        name="offer-basic.paymentTerms"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Payment Terms</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="e.g., Net 30 days, 2% discount if paid within 10 days"
-                className="resize-none"
-                {...field}
-                value={field.value || ''} // Ensure controlled input
-              />
-            </FormControl>
-            <FormDescription>
-              Payment conditions and terms for this offer
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="offer-basic.deliveryTerms"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Delivery Terms</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="e.g., FOB, EXW, DDP..."
-                className="resize-none"
-                {...field}
-                value={field.value || ''} // Ensure controlled input
-              />
-            </FormControl>
-            <FormDescription>
-              Delivery conditions and incoterms
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="offer-basic.notes"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Additional Notes</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Any additional information or special conditions..."
-                className="resize-none"
-                rows={4}
-                {...field}
-                value={field.value || ''} // Ensure controlled input
-              />
-            </FormControl>
-            <FormDescription>
-              Optional notes or special conditions for this offer
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </form>
+        <div className="flex justify-end">
+          <Button type="submit" disabled={!form.formState.isValid}>
+            Continue
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 } 

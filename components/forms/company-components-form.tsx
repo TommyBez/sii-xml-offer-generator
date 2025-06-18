@@ -12,7 +12,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useWizardStore } from '@/store/wizard-store';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { cn } from '@/lib/utils';
 
 // Type definitions

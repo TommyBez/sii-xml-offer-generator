@@ -20,7 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useWizardStore } from '@/store/wizard-store';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { offerValiditySchema, type OfferValidityData } from '@/schemas';
 import { CalendarIcon, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -127,7 +128,7 @@ export function OfferValidityForm({ initialData, onSubmit }: OfferValidityFormPr
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           {/* Date Range Presets */}
           <div className="space-y-2">

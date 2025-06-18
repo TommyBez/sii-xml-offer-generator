@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useWizardStore } from '@/store/wizard-store';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { paymentMethodsSchema, type PaymentMethodsData } from '@/schemas';
 import {
   Form,
@@ -134,7 +135,7 @@ export function PaymentMethodsForm({ initialData, onSubmit }: PaymentMethodsForm
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold mb-2">Payment Methods</h3>
@@ -415,9 +416,11 @@ export function PaymentMethodsForm({ initialData, onSubmit }: PaymentMethodsForm
           )}
         </div>
 
-        <button type="submit" className="hidden" aria-hidden="true">
-          Submit
-        </button>
+        <div className="flex justify-end">
+          <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2" disabled={!form.formState.isValid}>
+            Continue
+          </button>
+        </div>
       </form>
     </Form>
   );

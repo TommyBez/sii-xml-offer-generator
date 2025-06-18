@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+
 import { z } from 'zod';
 import { format } from 'date-fns';
 import {
@@ -117,8 +118,15 @@ interface ContractualConditionsFormProps {
   onSubmit?: (data: CondizioneContrattuale[]) => void;
 }
 
-export function ContractualConditionsForm({ onSubmit }: ContractualConditionsFormProps) {
-  const form = useFormContext();
+export function ContractualConditionsForm({ onSubmit: externalOnSubmit, initialData }: ContractualConditionsFormProps) {
+  const form = useWizardStepForm<typeof ContractualConditionsFormSchema>();
+
+  const handleSubmit = form.onSubmit(async (data) => {
+    // Call external onSubmit if provided
+    if (externalOnSubmit) {
+      await externalOnSubmit(data);
+    }
+  });
   const [conditions, setConditions] = useState<CondizioneContrattuale[]>([
     {
       TIPOLOGIA_CONDIZIONE: '01',
