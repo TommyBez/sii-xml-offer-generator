@@ -4,7 +4,14 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { enableMapSet } from 'immer';
 import type { StepId } from '@/components/wizard/stepper-layout';
-import { stepOrder, isStepVisible, isStepAccessible, getVisibleSteps } from '@/components/wizard/stepper-layout';
+import { stepOrder } from '@/components/wizard/stepper-layout';
+import { 
+  isStepVisible, 
+  isStepAccessible, 
+  getVisibleSteps as getVisibleStepsFromConditions,
+  getAccessibleSteps,
+  type FormData 
+} from '@/lib/step-conditions';
 
 // Enable MapSet plugin for Immer to handle Set data structures
 enableMapSet();
@@ -263,11 +270,11 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
           s.validMap = {} as Record<StepId, boolean>;
         }),
 
-        // New conditional logic methods
+        // Conditional logic methods using new step-conditions module
         getVisibleSteps: () => {
           const state = get();
           try {
-            return getVisibleSteps(state, state.completed);
+            return getVisibleStepsFromConditions(state.formData as FormData, stepOrder as StepId[]);
           } catch {
             // Fallback for SSR/hydration
             return stepOrder.slice(0, 3); // Return safe default
@@ -277,8 +284,7 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
         getAccessibleSteps: () => {
           const state = get();
           try {
-            const visibleSteps = state.getVisibleSteps();
-            return visibleSteps.filter(stepId => state.isStepAccessible(stepId));
+            return getAccessibleSteps(state.formData as FormData, stepOrder as StepId[], state.completed);
           } catch {
             // Fallback for SSR/hydration
             return stepOrder.slice(0, 3);
@@ -288,7 +294,7 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
         isStepVisible: (stepId) => {
           const state = get();
           try {
-            return Boolean(isStepVisible(stepId, state));
+            return Boolean(isStepVisible(stepId as StepId, state.formData as FormData));
           } catch {
             // Fallback for SSR/hydration - return true for first few steps
             return stepOrder.indexOf(stepId) < 3;
@@ -298,7 +304,7 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
         isStepAccessible: (stepId) => {
           const state = get();
           try {
-            return Boolean(isStepAccessible(stepId, state, state.completed));
+            return Boolean(isStepAccessible(stepId as StepId, state.formData as FormData, state.completed));
           } catch {
             // Fallback for SSR/hydration - return true for first few steps
             return stepOrder.indexOf(stepId) < 3;

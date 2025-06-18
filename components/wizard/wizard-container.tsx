@@ -3,7 +3,9 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useWizardStore, type WizardFormData } from '@/store/wizard-store';
-import { getVisibleSteps, isStepAccessible } from '@/lib/wizard-config';
+import { isStepAccessible, type FormData } from '@/lib/step-conditions';
+import { wizardSteps } from '@/lib/wizard-config';
+import type { StepId } from '@/components/wizard/stepper-layout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -94,11 +96,15 @@ export function WizardContainer() {
     saveDraft,
     canNavigateToStep,
     resetWizard,
+    getVisibleSteps,
+    isStepAccessible: storeIsStepAccessible,
   } = useWizardStore();
 
   // Get visible steps based on form data
-  const visibleSteps = getVisibleSteps(formData);
-  const currentStepConfig = visibleSteps[currentStep];
+  const visibleSteps = getVisibleSteps();
+  // Get step config from wizard config by mapping visible step IDs
+  const visibleStepConfigs = visibleSteps.map(stepId => wizardSteps.find(step => step.id === stepId)).filter(Boolean);
+  const currentStepConfig = visibleStepConfigs[currentStep];
 
   // Form methods with proper default values
   const methods = useForm<Partial<WizardFormData>>({
@@ -163,8 +169,8 @@ export function WizardContainer() {
       }
 
       // Check if current step is accessible
-      const targetStep = visibleSteps[stepIndex];
-      if (!isStepAccessible(targetStep.id, completedSteps, formData)) {
+      const targetStepId = visibleSteps[stepIndex] as StepId;
+      if (!storeIsStepAccessible(targetStepId)) {
         toast({
           title: 'Step not accessible',
           description: 'This step depends on other steps that are not completed yet.',
