@@ -96,12 +96,6 @@ Delete:
 
 ---
 
-## 4. Tests
-1. **Unit**: Import `stepVisibleMap` and provide mock `FormData` scenarios. Verify boolean outcome.
-2. **E2E**: Playwright script fills inputs to toggle a step (e.g., selects variable offer → Energy Price References step appears).
-
----
-
 ## 5. Risks & Mitigation
 | Risk | Mitigation |
 |------|------------|
@@ -113,7 +107,6 @@ Delete:
 ## 6. Effort Estimate
 * Port rules – **2 h**
 * Integration & compile – **1 h**
-* Tests – **1 h**
 * Review – **1 h**
 
 _Total: ~5 developer hours._
@@ -125,7 +118,6 @@ _Total: ~5 developer hours._
 - [ ] Navigation bar hides inaccessible steps.
 - [ ] Forward navigation blocked until dependencies completed.
 - [ ] Legacy visibility helpers removed.
-- [ ] CI green.
 
 ---
 
