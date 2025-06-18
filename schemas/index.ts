@@ -492,3 +492,166 @@ export const energyTypeSchema = z.object({
 });
 
 export type EnergyTypeData = z.infer<typeof energyTypeSchema>;
+
+// Offer Basic validation schema
+export const offerBasicSchema = z.object({
+  offerNumber: z.string().min(1, 'Offer number is required'),
+  date: z.date({
+    required_error: 'Offer date is required',
+  }),
+  validUntil: z.date({
+    required_error: 'Valid until date is required',
+  }),
+  currency: z.string().min(3).max(3, 'Currency must be 3 characters (e.g., EUR)'),
+  paymentTerms: z.string().optional(),
+  deliveryTerms: z.string().optional(),
+  notes: z.string().optional(),
+}).refine((data) => data.validUntil > data.date, {
+  message: 'Valid until date must be after offer date',
+  path: ['validUntil'],
+});
+
+export type OfferBasicData = z.infer<typeof offerBasicSchema>;
+
+// Time Bands validation schema
+export const timeBandsSchema = z.object({
+  TIPOLOGIA_FASCE: z.string({
+    required_error: 'Time band type is required',
+  }),
+  weeklyBands: z.object({
+    F_LUNEDI: z.string().optional(),
+    F_MARTEDI: z.string().optional(),
+    F_MERCOLEDI: z.string().optional(),
+    F_GIOVEDI: z.string().optional(),
+    F_VENERDI: z.string().optional(),
+    F_SABATO: z.string().optional(),
+    F_DOMENICA: z.string().optional(),
+    F_FESTIVITA: z.string().optional(),
+  }).optional(),
+});
+
+export type TimeBandsData = z.infer<typeof timeBandsSchema>;
+
+// Dual Offers validation schema
+export const dualOffersSchema = z.object({
+  OFFERTE_CONGIUNTE_EE: z
+    .array(z.string().max(32, 'Maximum 32 characters allowed'))
+    .min(1, 'At least one electricity offer code is required'),
+  OFFERTE_CONGIUNTE_GAS: z
+    .array(z.string().max(32, 'Maximum 32 characters allowed'))
+    .min(1, 'At least one gas offer code is required'),
+});
+
+export type DualOffersData = z.infer<typeof dualOffersSchema>;
+
+// Contractual Conditions validation schema
+export const contractualConditionsSchema = z.object({
+  conditions: z
+    .array(
+      z.object({
+        TIPOLOGIA_CONDIZIONE: z
+          .enum(['01', '02', '03', '04', '05', '99'], {
+            required_error: 'Condition type is required',
+          }),
+        ALTRO: z.string().max(20).optional(),
+        DESCRIZIONE: z.string().min(1, 'Description is required').max(3000, 'Maximum 3000 characters allowed'),
+        LIMITANTE: z.enum(['01', '02'], {
+          required_error: 'Limiting condition flag is required',
+        }),
+      })
+      .refine(
+        (data) => {
+          // ALTRO required when TIPOLOGIA_CONDIZIONE = '99'
+          if (data.TIPOLOGIA_CONDIZIONE === '99' && !data.ALTRO) {
+            return false;
+          }
+          return true;
+        },
+        {
+          message: 'Other condition type required when "Other" is selected',
+          path: ['ALTRO'],
+        }
+      )
+    )
+    .min(1, 'At least one contractual condition is required'),
+});
+
+export type ContractualConditionsData = z.infer<typeof contractualConditionsSchema>;
+
+// Consumption Profile validation schema
+export const consumptionProfileSchema = z.object({
+  annualConsumption: z
+    .number()
+    .min(0, 'Annual consumption must be non-negative')
+    .max(999999999, 'Maximum value exceeded'),
+  monthlyDistribution: z
+    .array(
+      z.object({
+        month: z.number().min(1).max(12),
+        percentage: z.number().min(0).max(100),
+      })
+    )
+    .optional(),
+  consumptionBand: z.enum(['0-1000', '1001-2500', '2501-5000', '5001-15000', '>15000']).optional(),
+  profileType: z.enum(['domestic', 'non-domestic', 'public-lighting', 'other']).optional(),
+});
+
+export type ConsumptionProfileData = z.infer<typeof consumptionProfileSchema>;
+
+// Company Components validation schema
+export const companyComponentsSchema = z.object({
+  components: z
+    .array(
+      z.object({
+        NOME: z.string().min(1, 'Component name is required').max(255, 'Maximum 255 characters allowed'),
+        DESCRIZIONE: z.string().min(1, 'Description is required').max(255, 'Maximum 255 characters allowed'),
+        TIPOLOGIA: z.enum(['01', '02'], {
+          required_error: 'Component type is required',
+        }),
+        MACROAREA: z.enum(['01', '02', '04', '05', '06'], {
+          required_error: 'Macro area is required',
+        }),
+        IntervalloPrezzi: z
+          .array(
+            z.object({
+              FASCIA_COMPONENTE: z.string().optional(),
+              CONSUMO_DA: z.number().min(0).optional(),
+              CONSUMO_A: z.number().min(0).optional(),
+              PREZZO: z.number().refine(val => {
+                const str = val.toString();
+                const parts = str.split('.');
+                return !parts[1] || parts[1].length <= 6;
+              }, 'Maximum 6 decimal places allowed'),
+              UNITA_MISURA: z.enum(['01', '02', '03', '04', '05'], {
+                required_error: 'Unit of measure is required',
+              }),
+              PeriodoValidita: z
+                .object({
+                  DURATA: z.number().min(1).max(99).optional(),
+                  VALIDO_FINO: z.string().regex(/^\d{2}\/\d{4}$/, 'Format: MM/YYYY').optional(),
+                  MESE_VALIDITA: z.array(z.string()).optional(),
+                })
+                .optional(),
+            })
+            .refine(
+              (data) => {
+                // Consumption range validation
+                if (data.CONSUMO_DA !== undefined && data.CONSUMO_A !== undefined) {
+                  return data.CONSUMO_A > data.CONSUMO_DA;
+                }
+                return true;
+              },
+              {
+                message: 'Maximum consumption must be greater than minimum consumption',
+                path: ['CONSUMO_A'],
+              }
+            )
+          )
+          .min(1, 'At least one price interval is required'),
+      })
+    )
+    .optional()
+    .default([]), // Entire section is optional
+});
+
+export type CompanyComponentsData = z.infer<typeof companyComponentsSchema>;
