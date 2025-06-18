@@ -235,6 +235,12 @@ export const runValidation = async (
     );
   }
 
+  if (formData.energyType) {
+    schemaValidationPromises.push(
+      runSchemaValidation('energyType', formData.energyType, 'energyTypeSchema')
+    );
+  }
+
   // Wait for all schema validations to complete
   const schemaValidationResults = await Promise.all(schemaValidationPromises);
   schemaValidationResults.forEach(errors => allErrors.push(...errors));
