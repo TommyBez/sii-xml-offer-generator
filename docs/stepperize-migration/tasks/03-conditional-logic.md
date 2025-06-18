@@ -114,10 +114,10 @@ _Total: ~5 developer hours._
 ---
 
 ## 7. Definition of Done
-- [ ] All conditions ported and unit-tested.
-- [ ] Navigation bar hides inaccessible steps.
-- [ ] Forward navigation blocked until dependencies completed.
-- [ ] Legacy visibility helpers removed.
+- [x] All conditions ported and unit-tested.
+- [x] Navigation bar hides inaccessible steps.
+- [x] Forward navigation blocked until dependencies completed.
+- [x] Legacy visibility helpers removed.
 
 ---
 
