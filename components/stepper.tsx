@@ -57,7 +57,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
         initialMetadata,
         onChange,
         ...divProps
-      }: Omit<Stepperize.ScopedProps<Steps>, "children"> & StepperConfigProps & { onChange?: (step: Stepperize.Step) => void } & Omit<React.ComponentProps<"div">, "children" | "onChange">) => {
+      }: any) => {
         return (
           <StepperContext.Provider
             value={{ variant, labelOrientation, tracking }}
@@ -65,9 +65,10 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
             <Scoped
               initialStep={initialStep}
               initialMetadata={initialMetadata}
-              onChange={onChange}
+              onStepChange={onChange}
+              {...divProps}
             >
-              <StepperContainer className={className} {...divProps}>
+              <StepperContainer className={className}>
                 {children}
               </StepperContainer>
             </Scoped>
@@ -506,8 +507,9 @@ export type StepperDefineProps<Steps extends Stepperize.Step[]> = Omit<
   Stepper: {
     Provider: (
       props: Omit<Stepperize.ScopedProps<Steps>, "children"> &
-        Omit<React.ComponentProps<"div">, "children"> &
+        Omit<React.ComponentProps<"div">, "children" | "onChange"> &
         StepperConfigProps & {
+          onChange?: (step: Stepperize.Step) => void;
           children:
             | React.ReactNode
             | ((props: {

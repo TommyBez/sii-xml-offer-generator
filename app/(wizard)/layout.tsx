@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useEffect, useMemo, useState } from 'react';
 import type { StepId } from '@/components/wizard/stepper-layout';
+import type * as Stepperize from '@stepperize/react';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const { 
@@ -67,9 +68,9 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
       <FormProvider {...methods}>
         <Stepper.Provider
           initialStep={currentId}
-          onChange={(step: { id: StepId }) => {
+          onChange={(step: Stepperize.Step) => {
             // Keep Zustand in sync with stepperize
-            setCurrentId(step.id);
+            setCurrentId(step.id as StepId);
           }}
           className="flex min-h-screen flex-col"
         >
@@ -251,7 +252,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                       visibleSteps.map(panelId => [
                         panelId,
                         () => (
-                          <Stepper.Panel of={panelId} key={panelId}>
+                          <Stepper.Panel of={panelId as StepId} key={panelId}>
                             {children}
                           </Stepper.Panel>
                         )
