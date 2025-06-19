@@ -19,7 +19,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { recipientDetailsSchema, type RecipientDetailsData } from '@/schemas';
-import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+import { useWizardStore } from '@/store/wizard-store';
+import { useStepper } from '@/components/wizard/stepper-layout';
+
 interface RecipientDetailsFormProps {
   initialData?: Partial<RecipientDetailsData>;
   onSubmit?: (data: RecipientDetailsData) => void;
@@ -42,7 +44,8 @@ const FieldIcon = ({ isValid }: { isValid: boolean }) => (
 );
 
 export function RecipientDetailsForm({ initialData, onSubmit }: RecipientDetailsFormProps) {
-  const { updateFormData, formData, markValid } = useWizardStore();
+  const { updateFormData, formData } = useWizardStore();
+  const stepper = useStepper();
   const [validFields, setValidFields] = useState<Set<string>>(new Set());
   
   const form = useForm<RecipientDetailsData>({
@@ -85,15 +88,6 @@ export function RecipientDetailsForm({ initialData, onSubmit }: RecipientDetails
       return prevValidFields;
     });
   }, [JSON.stringify(watchedValues)]);
-
-  // Update wizard store validation state - debounced to avoid excessive calls
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      markValid('recipient-details', form.formState.isValid);
-    }, 100);
-    
-    return () => clearTimeout(timeoutId);
-  }, [form.formState.isValid, markValid]);
 
   // Save form data to store on change
   useEffect(() => {

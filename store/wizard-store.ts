@@ -3,15 +3,6 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { enableMapSet } from 'immer';
-import type { StepId } from '@/components/wizard/stepper-layout';
-import { stepOrder } from '@/components/wizard/stepper-layout';
-import { 
-  isStepVisible, 
-  isStepAccessible, 
-  getVisibleSteps as getVisibleStepsFromConditions,
-  getAccessibleSteps,
-  type FormData 
-} from '@/lib/step-conditions';
 
 // Enable MapSet plugin for Immer to handle Set data structures
 enableMapSet();
@@ -126,10 +117,8 @@ export interface WizardFormData {
   [key: string]: any; // Allow additional properties
 }
 
-// Wizard state interfaces
+// Wizard state interfaces - simplified to only form data
 export interface WizardState {
-  currentStep: number;
-  completedSteps: Set<number>;
   formData: Partial<WizardFormData>;
   validationErrors: ValidationErrors;
   isDirty: boolean;
@@ -138,209 +127,34 @@ export interface WizardState {
 
 export type ValidationErrors = Record<string, Record<string, string>>;
 
-// Stepper state interface (new stepperize integration)
-export interface StepperState {
-  currentId: StepId;
-  completed: Set<StepId>;
-  validMap: Record<StepId, boolean>;
-  goTo: (id: StepId) => void;
-  next: () => void;
-  prev: () => void;
-  markValid: (id: StepId, valid: boolean) => void;
-  resetStepper: () => void;
-  getVisibleSteps: () => StepId[];
-  getAccessibleSteps: () => StepId[];
-  isStepVisible: (stepId: StepId) => boolean;
-  isStepAccessible: (stepId: StepId) => boolean;
-  canNavigateToStepId: (stepId: StepId) => boolean;
-}
-
-// Stepper actions interface (new stepperize integration)
-export interface StepperActions {
-  goTo: (id: StepId) => void;
-  next: () => void;
-  prev: () => void;
-  markValid: (id: StepId, valid: boolean) => void;
-  resetStepper: () => void;
-}
-
-// Wizard actions interface
+// Wizard actions interface - only form data related actions
 export interface WizardActions {
-  setCurrentStep: (step: number) => void;
-  markStepCompleted: (step: number) => void;
-  markStepIncomplete: (step: number) => void;
   updateFormData: (section: string, data: any) => void;
   setValidationErrors: (section: string, errors: Record<string, string>) => void;
   clearValidationErrors: (section?: string) => void;
   setIsDirty: (isDirty: boolean) => void;
   saveDraft: () => void;
   resetWizard: () => void;
-  canNavigateToStep: (step: number) => boolean;
 }
 
 // Initial state
 const initialState: WizardState = {
-  currentStep: 0,
-  completedSteps: new Set<number>(),
   formData: {},
   validationErrors: {},
   isDirty: false,
   lastSavedAt: null,
 };
 
-// Initial stepper state
-const initialStepperState: StepperState = {
-  currentId: stepOrder[0],
-  completed: new Set<StepId>(),
-  validMap: {} as Record<StepId, boolean>,
-  goTo: () => {},
-  next: () => {},
-  prev: () => {},
-  markValid: () => {},
-  resetStepper: () => {},
-  getVisibleSteps: () => [],
-  getAccessibleSteps: () => [],
-  isStepVisible: () => false,
-  isStepAccessible: () => false,
-  canNavigateToStepId: () => false,
-};
-
 // Create the store with persistence
-export const useWizardStore = create<WizardState & WizardActions & StepperState & StepperActions>()(
+export const useWizardStore = create<WizardState & WizardActions>()(
   devtools(
     persist(
       immer((set, get) => ({
         // State
         ...initialState,
-        ...initialStepperState,
 
-        // ───────────────────── stepper slice ──────────────────────
-        goTo: (id) => {
-          const state = get();
-          // Allow navigation to any visible step, let UI handle accessibility
-          if (state.isStepVisible(id)) {
-            set((s) => {
-              s.currentId = id;
-            });
-          }
-        },
-        
-        next: () => {
-          const state = get();
-          const visibleSteps = state.getVisibleSteps();
-          const currentIndex = visibleSteps.indexOf(state.currentId);
-          
-          if (currentIndex < visibleSteps.length - 1) {
-            const nextStepId = visibleSteps[currentIndex + 1];
-            if (state.canNavigateToStepId(nextStepId)) {
-              set((s) => {
-                s.currentId = nextStepId;
-              });
-            }
-          }
-        },
-        
-        prev: () => {
-          const state = get();
-          const visibleSteps = state.getVisibleSteps();
-          const currentIndex = visibleSteps.indexOf(state.currentId);
-          
-          if (currentIndex > 0) {
-            const prevStepId = visibleSteps[currentIndex - 1];
-            set((s) => {
-              s.currentId = prevStepId;
-            });
-          }
-        },
-        
-        markValid: (id, valid) => set((s) => {
-          s.validMap[id] = valid;
-          
-          // Mark step as completed if it becomes valid
-          if (valid) {
-            s.completed.add(id);
-          } else {
-            s.completed.delete(id);
-          }
-        }),
-        
-        resetStepper: () => set((s) => {
-          s.currentId = stepOrder[0];
-          s.completed.clear();
-          s.validMap = {} as Record<StepId, boolean>;
-        }),
-
-        // Conditional logic methods using new step-conditions module
-        getVisibleSteps: () => {
-          const state = get();
-          try {
-            return getVisibleStepsFromConditions(state.formData as FormData, stepOrder as StepId[]);
-          } catch {
-            // Fallback for SSR/hydration
-            return stepOrder.slice(0, 3); // Return safe default
-          }
-        },
-
-        getAccessibleSteps: () => {
-          const state = get();
-          try {
-            return getAccessibleSteps(state.formData as FormData, stepOrder as StepId[], state.completed);
-          } catch {
-            // Fallback for SSR/hydration
-            return stepOrder.slice(0, 3);
-          }
-        },
-
-        isStepVisible: (stepId) => {
-          const state = get();
-          try {
-            return Boolean(isStepVisible(stepId as StepId, state.formData as FormData));
-          } catch {
-            // Fallback for SSR/hydration - return true for first few steps
-            return stepOrder.indexOf(stepId) < 3;
-          }
-        },
-
-        isStepAccessible: (stepId) => {
-          const state = get();
-          try {
-            return Boolean(isStepAccessible(stepId as StepId, state.formData as FormData, state.completed));
-          } catch {
-            // Fallback for SSR/hydration - return true for first few steps
-            return stepOrder.indexOf(stepId) < 3;
-          }
-        },
-
-        canNavigateToStepId: (stepId) => {
-          const state = get();
-          try {
-            return Boolean(state.isStepVisible(stepId) && state.isStepAccessible(stepId));
-          } catch {
-            // Fallback for SSR/hydration
-            return stepOrder.indexOf(stepId) < 3;
-          }
-        },
-
-        // ───────────────────── original wizard actions ──────────────────────
-        setCurrentStep: (step) => {
-          set((state) => {
-            state.currentStep = step;
-          });
-        },
-
-        markStepCompleted: (step) => {
-          set((state) => {
-            state.completedSteps.add(step);
-          });
-        },
-
-        markStepIncomplete: (step) => {
-          set((state) => {
-            state.completedSteps.delete(step);
-          });
-        },
-
-        updateFormData: (section, data) => {
+        // ───────────────────── form data actions ──────────────────────
+        updateFormData: (section: string, data: any) => {
           set((state) => {
             // Use Object.assign to properly merge the data
             state.formData[section] = Object.assign({}, state.formData[section], data);
@@ -348,13 +162,13 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
           });
         },
 
-        setValidationErrors: (section, errors) => {
+        setValidationErrors: (section: string, errors: Record<string, string>) => {
           set((state) => {
             state.validationErrors[section] = errors;
           });
         },
 
-        clearValidationErrors: (section) => {
+        clearValidationErrors: (section?: string) => {
           set((state) => {
             if (section) {
               delete state.validationErrors[section];
@@ -364,7 +178,7 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
           });
         },
 
-        setIsDirty: (isDirty) => {
+        setIsDirty: (isDirty: boolean) => {
           set((state) => {
             state.isDirty = isDirty;
           });
@@ -379,26 +193,9 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
 
         resetWizard: () => {
           set((state) => {
-            // Reset wizard state
+            // Reset wizard state to initial values
             Object.assign(state, initialState);
-            // Reset stepper state
-            Object.assign(state, initialStepperState);
           });
-        },
-
-        canNavigateToStep: (step) => {
-          const state = get();
-          // Can always go back to previous steps
-          if (step < state.currentStep) return true;
-          
-          // Can navigate to the next immediate step (to allow completion of current step)
-          if (step === state.currentStep + 1) return true;
-          
-          // For steps beyond the next one, check if all previous steps are completed
-          for (let i = 0; i < step; i++) {
-            if (!state.completedSteps.has(i)) return false;
-          }
-          return true;
         },
       })),
       {
@@ -406,25 +203,8 @@ export const useWizardStore = create<WizardState & WizardActions & StepperState 
         storage: createJSONStorage(() => localStorage),
         partialize: (state) => ({
           formData: state.formData,
-          completedSteps: Array.from(state.completedSteps),
-          currentStep: state.currentStep,
           lastSavedAt: state.lastSavedAt,
-          // Stepper state
-          currentId: state.currentId,
-          completed: Array.from(state.completed),
-          validMap: state.validMap,
         }),
-        onRehydrateStorage: () => (state) => {
-          if (state) {
-            // Convert arrays back to Sets after rehydration
-            if (state.completedSteps) {
-              state.completedSteps = new Set(state.completedSteps as any);
-            }
-            if (state.completed) {
-              state.completed = new Set(state.completed as any);
-            }
-          }
-        },
       }
     ),
     {

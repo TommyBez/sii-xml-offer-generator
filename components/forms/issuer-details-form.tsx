@@ -20,13 +20,15 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { issuerDetailsSchema, type IssuerDetailsData } from '@/schemas';
 import { useWizardStepForm } from '@/hooks/use-wizard-step-form';
+import { useWizardStore } from '@/store/wizard-store';
+
 interface IssuerDetailsFormProps {
   initialData?: Partial<IssuerDetailsData>;
   onSubmit?: (data: IssuerDetailsData) => void;
 }
 
 export function IssuerDetailsForm({ initialData, onSubmit }: IssuerDetailsFormProps) {
-  const { updateFormData, formData, markValid } = useWizardStore();
+  const { updateFormData, formData } = useWizardStore();
   const [validFields, setValidFields] = useState<Set<string>>(new Set());
   
   const form = useForm<IssuerDetailsData>({
@@ -70,15 +72,6 @@ export function IssuerDetailsForm({ initialData, onSubmit }: IssuerDetailsFormPr
       return prevValidFields;
     });
   }, [JSON.stringify(watchedValues)]);
-
-  // Update wizard store validation state - debounced to avoid excessive calls
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      markValid('issuer-details', form.formState.isValid);
-    }, 100);
-    
-    return () => clearTimeout(timeoutId);
-  }, [form.formState.isValid, markValid]);
 
   // Save form data to store on change
   useEffect(() => {

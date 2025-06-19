@@ -1,7 +1,8 @@
 'use client';
 
+import React from 'react';
 import { useWizardStore } from '@/store/wizard-store';
-import { Stepper } from '@/components/wizard/stepper-layout';
+import { Stepper, useStepper } from '@/components/wizard/stepper-layout';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Save, RotateCcw, CheckCircle, Circle, Lock } from 'lucide-react';
@@ -11,22 +12,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const { 
-    currentId, 
     formData,
-    validMap, 
-    completed,
-    goTo, 
-    next, 
-    prev, 
-    markValid, 
-    resetStepper,
-    getVisibleSteps,
-    getAccessibleSteps,
-    isStepVisible,
-    isStepAccessible,
-    canNavigateToStepId,
     saveDraft,
-    isDirty 
+    isDirty,
+    resetWizard
   } = useWizardStore();
   
   const { toast } = useToast();
@@ -37,15 +26,6 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     setIsHydrated(true);
   }, []);
-  
-  // Calculate visible steps consistently
-  const visibleSteps = useMemo(() => {
-    if (!isHydrated) {
-      // Return initial state during SSR to match server rendering
-      return ['identification', 'offer-basic', 'offer-details'];
-    }
-    return getVisibleSteps();
-  }, [getVisibleSteps, isHydrated]);
   
   // Default form for wizard-wide state
   const methods = useForm({
@@ -71,64 +51,60 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
     <TooltipProvider>
       <FormProvider {...methods}>
         <Stepper.Provider
-          initialStep={currentId}
-          onStepChange={(step) => {
-            const stepId = step.id as any;
-            // Update Zustand store when stepperize state changes
-            goTo(stepId);
-          }}
           className="flex min-h-screen flex-col"
         >
-          {({ methods }) => (
-            <>
-              {/* Header */}
-              <header className="border-b bg-background">
-                <div className="container mx-auto px-4 py-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h1 className="text-2xl font-bold">Energy Offer Wizard</h1>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>Step {visibleSteps.indexOf(currentId) + 1} of {visibleSteps.length}</span>
+          {({ methods, metadata }: { methods: any; metadata: any }) => {
+            const currentStep = methods.current;
+            const visibleSteps = methods.all.filter((step: any) => methods.utils.isStepVisible(step.id));
+            const currentIndex = visibleSteps.findIndex((step: any) => step.id === currentStep.id);
+            
+            return (
+              <>
+                {/* Header */}
+                <header className="border-b bg-background">
+                  <div className="container mx-auto px-4 py-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h1 className="text-2xl font-bold">Energy Offer Wizard</h1>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>Step {currentIndex + 1} of {visibleSteps.length}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            resetWizard();
+                            methods.reset();
+                            toast({
+                              title: 'Wizard reset',
+                              description: 'All progress has been cleared.',
+                            });
+                          }}
+                          className="gap-2"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          Reset
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          resetStepper();
-                          methods.reset();
-                          toast({
-                            title: 'Wizard reset',
-                            description: 'All progress has been cleared.',
-                          });
-                        }}
-                        className="gap-2"
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                        Reset
-                      </Button>
-                    </div>
                   </div>
-                </div>
-              </header>
+                </header>
 
-              {/* Stepper Navigation - horizontally scrollable */}
-              <Stepper.Navigation className="border-b bg-background">
-                <div className="container mx-auto px-4 py-4">
-                  <div className="overflow-x-auto scrollbar-hide">
-                    <div className="flex gap-3 px-4 min-w-max">
-                      {methods.all
-                        .filter(step => isStepVisible(step.id as any, formData))
-                        .map((step, index) => {
-                          const stepId = step.id as any;
-                          // Ensure boolean values for consistent hydration
-                          const isAccessible = Boolean(isStepAccessible(stepId, formData, completed));
-                          const isCompleted = Boolean(completed.has(stepId));
-                          const isActive = Boolean(currentId === stepId);
-                          const isValid = Boolean(validMap[stepId]);
+                {/* Stepper Navigation - horizontally scrollable */}
+                <Stepper.Navigation className="border-b bg-background">
+                  <div className="container mx-auto px-4 py-4">
+                    <div className="overflow-x-auto scrollbar-hide">
+                      <div className="flex gap-3 px-4 min-w-max">
+                        {visibleSteps.map((step, index) => {
+                          const stepId = step.id;
+                          const isAccessible = methods.utils.isStepAccessible(stepId);
+                          const isCompleted = metadata.completed.has(stepId);
+                          const isActive = currentStep.id === stepId;
+                          const isValid = metadata.validMap[stepId];
 
-                          // Status information for tooltip - fix logic to match actual state
+                          // Status information for tooltip
                           const stepStatus = isActive 
                             ? 'In Progress' 
                             : isCompleted && !isActive
@@ -164,8 +140,6 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                   `}
                                   onClick={() => {
                                     if (isAccessible) {
-                                      // Update both stepperize and store state
-                                      goTo(stepId);
                                       methods.goTo(step.id);
                                       // Scroll active step into view
                                       setTimeout(() => {
@@ -188,7 +162,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                   }}
                                   disabled={!isAccessible}
                                 >
-                                  {isCompleted ? '✓' : visibleSteps.indexOf(stepId) + 1}
+                                  {isCompleted ? '✓' : index + 1}
                                   {isValid && !isCompleted && !isActive && (
                                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                                   )}
@@ -204,7 +178,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                     <p className="text-xs text-muted-foreground">{step.description}</p>
                                   )}
                                   <div className="flex items-center justify-between text-xs">
-                                    <span className="text-muted-foreground">Step {visibleSteps.indexOf(stepId) + 1} of {visibleSteps.length}</span>
+                                    <span className="text-muted-foreground">Step {index + 1} of {visibleSteps.length}</span>
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                       stepStatus === 'In Progress'
                                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
@@ -234,114 +208,112 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                             </Tooltip>
                           );
                         })}
+                      </div>
+                    </div>
+                    
+                    {/* Current step info */}
+                    <div className="text-center mt-4 space-y-1">
+                      <p className="font-medium text-foreground">
+                        {currentStep.title}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Step {currentIndex + 1} of {visibleSteps.length}
+                      </p>
                     </div>
                   </div>
-                  
-                  {/* Current step info */}
-                  <div className="text-center mt-4 space-y-1">
-                    <p className="font-medium text-foreground">
-                      {methods.all.find(s => s.id === currentId)?.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Step {visibleSteps.indexOf(currentId) + 1} of {visibleSteps.length}
-                    </p>
+                </Stepper.Navigation>
+
+                {/* Main content area */}
+                <main className="flex-1 overflow-y-auto">
+                  <div className="container mx-auto px-4 py-8">
+                    {/* Use stepperize switch for proper content switching */}
+                    {methods.switch(
+                      Object.fromEntries(
+                        visibleSteps.map(stepId => [
+                          stepId.id,
+                          (step) => (
+                            <Stepper.Panel of={stepId.id} key={stepId.id}>
+                              {children}
+                            </Stepper.Panel>
+                          )
+                        ])
+                      )
+                    )}
                   </div>
-                </div>
-              </Stepper.Navigation>
+                </main>
 
-              {/* Main content area */}
-              <main className="flex-1 overflow-y-auto">
-                <div className="container mx-auto px-4 py-8">
-                  {/* Use stepperize switch for proper content switching */}
-                  {methods.switch(
-                    Object.fromEntries(
-                      visibleSteps.map(stepId => [
-                        stepId,
-                        (step) => (
-                          <Stepper.Panel of={stepId} key={stepId}>
-                            {children}
-                          </Stepper.Panel>
-                        )
-                      ])
-                    )
-                  )}
-                </div>
-              </main>
-
-              {/* Footer Controls */}
-              <footer className="border-t bg-background p-4">
-                <div className="container mx-auto flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        prev();
-                        methods.prev();
-                      }}
-                      disabled={visibleSteps.indexOf(currentId) === 0}
-                      className="gap-2"
-                    >
-                      Previous
-                    </Button>
-
-                    <div className="text-sm text-muted-foreground">
-                      {completed.size} of {visibleSteps.length} steps completed
-                    </div>
-
-                    <Button
-                      onClick={() => {
-                        const currentIndex = visibleSteps.indexOf(currentId);
-                        const isLastVisibleStep = currentIndex === visibleSteps.length - 1;
-                        
-                        if (isLastVisibleStep) {
-                          toast({
-                            title: 'Wizard completed!',
-                            description: 'You have completed all visible steps.',
-                          });
-                        } else {
-                          const isCurrentStepValid = validMap[currentId];
-                          if (isCurrentStepValid) {
-                            next();
-                            methods.next();
-                          } else {
-                            toast({
-                              title: 'Please complete current step',
-                              description: 'Complete all required fields before proceeding.',
-                              variant: 'destructive',
-                            });
-                          }
-                        }
-                      }}
-                      disabled={!validMap[currentId] && visibleSteps.indexOf(currentId) !== visibleSteps.length - 1}
-                      className="gap-2"
-                    >
-                      {visibleSteps.indexOf(currentId) === visibleSteps.length - 1 ? 'Finish' : 'Next'}
-                    </Button>
-                  </div>
-
-                  {isDirty && (
-                    <div className="flex items-center gap-2">
+                {/* Footer Controls */}
+                <footer className="border-t bg-background p-4">
+                  <div className="container mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-4">
                       <Button
                         variant="outline"
-                        size="sm"
                         onClick={() => {
-                          saveDraft();
-                          toast({
-                            title: 'Draft saved',
-                            description: 'Your progress has been saved.',
-                          });
+                          methods.prev();
                         }}
+                        disabled={currentIndex === 0}
                         className="gap-2"
                       >
-                        <Save className="h-4 w-4" />
-                        Save Draft
+                        Previous
+                      </Button>
+
+                      <div className="text-sm text-muted-foreground">
+                        {metadata.completed.size} of {visibleSteps.length} steps completed
+                      </div>
+
+                      <Button
+                        onClick={() => {
+                          const isLastVisibleStep = currentIndex === visibleSteps.length - 1;
+                          
+                          if (isLastVisibleStep) {
+                            toast({
+                              title: 'Wizard completed!',
+                              description: 'You have completed all visible steps.',
+                            });
+                          } else {
+                            const isCurrentStepValid = metadata.validMap[currentStep.id];
+                            if (isCurrentStepValid) {
+                              methods.next();
+                            } else {
+                              toast({
+                                title: 'Please complete current step',
+                                description: 'Complete all required fields before proceeding.',
+                                variant: 'destructive',
+                              });
+                            }
+                          }
+                        }}
+                        disabled={!metadata.validMap[currentStep.id] && currentIndex !== visibleSteps.length - 1}
+                        className="gap-2"
+                      >
+                        {currentIndex === visibleSteps.length - 1 ? 'Finish' : 'Next'}
                       </Button>
                     </div>
-                  )}
-                </div>
-              </footer>
-            </>
-          )}
+
+                    {isDirty && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            saveDraft();
+                            toast({
+                              title: 'Draft saved',
+                              description: 'Your progress has been saved.',
+                            });
+                          }}
+                          className="gap-2"
+                        >
+                          <Save className="h-4 w-4" />
+                          Save Draft
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </footer>
+              </>
+            );
+          }}
         </Stepper.Provider>
       </FormProvider>
     </TooltipProvider>

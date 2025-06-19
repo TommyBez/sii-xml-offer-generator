@@ -2,29 +2,27 @@
 
 import { WizardStepContent } from '@/components/wizard/wizard-step-content';
 import { useWizardStore } from '@/store/wizard-store';
+import { useStepper } from '@/components/wizard/stepper-layout';
 import { getStepById } from '@/lib/wizard-config';
 import { useEffect } from 'react';
-import type { StepId } from '@/components/wizard/stepper-layout';
 import { useToast } from '@/hooks/use-toast';
 
 export default function WizardPage() {
   const { 
-    currentId, 
     formData,
-    updateFormData, 
-    markValid,
-    isStepVisible,
-    isStepAccessible,
-    completed
+    updateFormData
   } = useWizardStore();
+  
+  const stepper = useStepper();
   const { toast } = useToast();
   
-  // Get the current step configuration using the currentId from the store
+  // Get the current step configuration using the currentId from stepperize
+  const currentId = stepper.current.id;
   const currentStepConfig = getStepById(currentId);
 
-  // Check if current step is visible and accessible
-  const stepVisible = isStepVisible(currentId, formData);
-  const stepAccessible = isStepAccessible(currentId, formData, completed);
+  // Check if current step is visible and accessible using stepperize utilities
+  const stepVisible = stepper.utils.isStepVisible(currentId);
+  const stepAccessible = stepper.utils.isStepAccessible(currentId);
 
   // Handle form submission for current step
   const handleStepSubmit = async (data: Record<string, unknown>) => {
@@ -33,7 +31,7 @@ export default function WizardPage() {
       
       if (sectionKey) {
         updateFormData(sectionKey, data);
-        markValid(sectionKey as StepId, true);
+        stepper.utils.markValid(sectionKey, true);
         
         toast({
           title: 'Step completed',
@@ -43,7 +41,7 @@ export default function WizardPage() {
     } catch (error) {
       console.error('Error submitting step:', error);
       if (currentStepConfig) {
-        markValid(currentStepConfig.id as StepId, false);
+        stepper.utils.markValid(currentStepConfig.id, false);
         toast({
           title: 'Error saving step',
           description: 'Please check your input and try again.',
@@ -63,9 +61,9 @@ export default function WizardPage() {
       // For now, mark as valid if step has data or is optional
       // This will be enhanced with proper validation integration
       const isValid = hasData || currentStepConfig.isOptional;
-      markValid(currentStepConfig.id as StepId, Boolean(isValid));
+      stepper.utils.markValid(currentStepConfig.id, Boolean(isValid));
     }
-  }, [currentStepConfig, stepVisible, stepAccessible, formData, markValid]);
+  }, [currentStepConfig, stepVisible, stepAccessible, formData, stepper]);
 
   // Show error if step is not visible
   if (!stepVisible) {
