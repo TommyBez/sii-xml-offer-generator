@@ -1,7 +1,7 @@
 'use client';
 
 import { useWizardStore } from '@/store/wizard-store';
-import { Stepper } from '@/components/wizard/stepper-layout';
+import { Stepper, steps as wizardStepsArray } from '@/components/wizard/stepper-layout';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Save, RotateCcw, CheckCircle, Circle, Lock } from 'lucide-react';
@@ -252,7 +252,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                       visibleSteps.map(panelId => [
                         panelId,
                         (_step: Stepperize.Step) => (
-                          <Stepper.Panel of={panelId as StepId} key={panelId}>
+                          <Stepper.Panel key={panelId}>
                             {children}
                           </Stepper.Panel>
                         )
