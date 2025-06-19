@@ -251,7 +251,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                     Object.fromEntries(
                       visibleSteps.map(panelId => [
                         panelId,
-                        () => (
+                        (_step: Stepperize.Step) => (
                           <Stepper.Panel of={panelId as StepId} key={panelId}>
                             {children}
                           </Stepper.Panel>
