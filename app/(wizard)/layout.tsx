@@ -8,23 +8,18 @@ import { Save, RotateCcw, CheckCircle, Circle, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useEffect, useMemo, useState } from 'react';
+import type { StepId } from '@/components/wizard/stepper-layout';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const { 
     currentId, 
     formData,
-    validMap, 
     completed,
-    goTo, 
-    next, 
-    prev, 
-    markValid, 
+    setCurrentId,
     resetStepper,
     getVisibleSteps,
-    getAccessibleSteps,
     isStepVisible,
     isStepAccessible,
-    canNavigateToStepId,
     saveDraft,
     isDirty 
   } = useWizardStore();
@@ -73,9 +68,8 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
         <Stepper.Provider
           initialStep={currentId}
           onStepChange={(step) => {
-            const stepId = step.id as any;
-            // Update Zustand store when stepperize state changes
-            goTo(stepId);
+            // Keep Zustand in sync with stepperize
+            setCurrentId(step.id as StepId);
           }}
           className="flex min-h-screen flex-col"
         >
@@ -119,14 +113,14 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                   <div className="overflow-x-auto scrollbar-hide">
                     <div className="flex gap-3 px-4 min-w-max">
                       {methods.all
-                        .filter(step => isStepVisible(step.id as any, formData))
+                        .filter(step => isStepVisible(step.id as StepId))
                         .map((step, index) => {
-                          const stepId = step.id as any;
+                          const stepId = step.id as StepId;
                           // Ensure boolean values for consistent hydration
-                          const isAccessible = Boolean(isStepAccessible(stepId, formData, completed));
+                          const isAccessible = Boolean(isStepAccessible(stepId));
                           const isCompleted = Boolean(completed.has(stepId));
                           const isActive = Boolean(currentId === stepId);
-                          const isValid = Boolean(validMap[stepId]);
+                          const isValid = Boolean(completed.has(stepId));
 
                           // Status information for tooltip - fix logic to match actual state
                           const stepStatus = isActive 
@@ -164,8 +158,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                                   `}
                                   onClick={() => {
                                     if (isAccessible) {
-                                      // Update both stepperize and store state
-                                      goTo(stepId);
+                                      // Navigate via stepperize (store sync handled by onStepChange)
                                       methods.goTo(step.id);
                                       // Scroll active step into view
                                       setTimeout(() => {
@@ -275,7 +268,6 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                     <Button
                       variant="outline"
                       onClick={() => {
-                        prev();
                         methods.prev();
                       }}
                       disabled={visibleSteps.indexOf(currentId) === 0}
@@ -299,9 +291,8 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                             description: 'You have completed all visible steps.',
                           });
                         } else {
-                          const isCurrentStepValid = validMap[currentId];
+                          const isCurrentStepValid = completed.has(currentId);
                           if (isCurrentStepValid) {
-                            next();
                             methods.next();
                           } else {
                             toast({
@@ -312,7 +303,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                           }
                         }
                       }}
-                      disabled={!validMap[currentId] && visibleSteps.indexOf(currentId) !== visibleSteps.length - 1}
+                      disabled={!completed.has(currentId) && visibleSteps.indexOf(currentId) !== visibleSteps.length - 1}
                       className="gap-2"
                     >
                       {visibleSteps.indexOf(currentId) === visibleSteps.length - 1 ? 'Finish' : 'Next'}

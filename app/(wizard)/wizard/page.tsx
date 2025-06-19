@@ -14,8 +14,7 @@ export default function WizardPage() {
     updateFormData, 
     markValid,
     isStepVisible,
-    isStepAccessible,
-    completed
+    isStepAccessible
   } = useWizardStore();
   const { toast } = useToast();
   
@@ -23,8 +22,8 @@ export default function WizardPage() {
   const currentStepConfig = getStepById(currentId);
 
   // Check if current step is visible and accessible
-  const stepVisible = isStepVisible(currentId, formData);
-  const stepAccessible = isStepAccessible(currentId, formData, completed);
+  const stepVisible = isStepVisible(currentId);
+  const stepAccessible = isStepAccessible(currentId);
 
   // Handle form submission for current step
   const handleStepSubmit = async (data: Record<string, unknown>) => {
