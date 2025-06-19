@@ -67,9 +67,9 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
       <FormProvider {...methods}>
         <Stepper.Provider
           initialStep={currentId}
-          onStepChange={(step) => {
+          onChange={(step: { id: StepId }) => {
             // Keep Zustand in sync with stepperize
-            setCurrentId(step.id as StepId);
+            setCurrentId(step.id);
           }}
           className="flex min-h-screen flex-col"
         >
@@ -114,7 +114,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                     <div className="flex gap-3 px-4 min-w-max">
                       {methods.all
                         .filter(step => isStepVisible(step.id as StepId))
-                        .map((step, index) => {
+                        .map((step) => {
                           const stepId = step.id as StepId;
                           // Ensure boolean values for consistent hydration
                           const isAccessible = Boolean(isStepAccessible(stepId));
@@ -248,10 +248,10 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                   {/* Use stepperize switch for proper content switching */}
                   {methods.switch(
                     Object.fromEntries(
-                      visibleSteps.map(stepId => [
-                        stepId,
-                        (step) => (
-                          <Stepper.Panel of={stepId} key={stepId}>
+                      visibleSteps.map(panelId => [
+                        panelId,
+                        () => (
+                          <Stepper.Panel of={panelId} key={panelId}>
                             {children}
                           </Stepper.Panel>
                         )

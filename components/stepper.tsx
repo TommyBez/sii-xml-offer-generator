@@ -55,7 +55,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
         className,
         initialStep,
         initialMetadata,
-        onStepChange,
+        onChange,
         ...divProps
       }) => {
         return (
@@ -65,7 +65,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
             <Scoped
               initialStep={initialStep}
               initialMetadata={initialMetadata}
-              onStepChange={onStepChange}
+              onChange={onChange}
             >
               <StepperContainer className={className} {...divProps}>
                 {children}
