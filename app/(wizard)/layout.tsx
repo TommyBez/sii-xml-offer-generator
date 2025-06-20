@@ -7,10 +7,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Save, RotateCcw, CheckCircle, Circle, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { FormProvider, useForm } from 'react-hook-form';
-import * as React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, type ReactNode } from 'react';
 
-export default function WizardLayout({ children }: { children: React.ReactNode }) {
+export default function WizardLayout({ children }: { children: ReactNode }) {
   const { formData, saveDraft, isDirty } = useWizardStore();
   
   const { toast } = useToast();
@@ -55,7 +54,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
     <TooltipProvider>
       <FormProvider {...methods}>
         <Stepper.Provider className="flex min-h-screen flex-col">
-          {({ methods: stepper }: { methods: any }) => {
+          {({ methods: stepper }: any) => {
             const currentId = stepper.current.id as any;
 
             // Build validation map & completion set from step metadata
