@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { devtools, persist, createJSONStorage } from 'zustand/middleware';
+import { create, type StoreApi } from 'zustand';
+import { devtools, persist, createJSONStorage } from 'zustand/middleware.js';
 import { immer } from 'zustand/middleware/immer';
 import { Draft } from 'immer';
 
@@ -79,7 +79,7 @@ const initialState: WizardState = {
 export const useWizardStore = create<WizardState & WizardActions>()(
   devtools(
     persist(
-      immer((set, get) => ({
+      immer((set: StoreApi<WizardState & WizardActions>['setState'], get: StoreApi<WizardState & WizardActions>['getState']) => ({
         // ────────── State ──────────
         ...initialState,
 
