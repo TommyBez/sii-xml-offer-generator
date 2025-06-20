@@ -7,7 +7,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Save, RotateCcw, CheckCircle, Circle, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { FormProvider, useForm } from 'react-hook-form';
-import React, { useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const { formData, saveDraft, isDirty } = useWizardStore();
