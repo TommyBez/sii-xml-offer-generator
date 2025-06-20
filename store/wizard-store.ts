@@ -1,7 +1,7 @@
-import { create, type StoreApi } from 'zustand';
+import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { Draft } from 'immer';
+import type { Draft } from 'immer';
 
 // ────────────────────────────────────────────────────────────
 // Types
@@ -79,7 +79,8 @@ const initialState: WizardState = {
 export const useWizardStore = create<WizardState & WizardActions>()(
   devtools(
     persist(
-      immer((set: StoreApi<WizardState & WizardActions>['setState'] as any, get: StoreApi<WizardState & WizardActions>['getState']) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      immer((set: any, get: any) => ({
         // ────────── State ──────────
         ...initialState,
 
