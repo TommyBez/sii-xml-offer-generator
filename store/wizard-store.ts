@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { Draft } from 'immer';
 
 // ────────────────────────────────────────────────────────────
 // Types
@@ -83,8 +84,8 @@ export const useWizardStore = create<WizardState & WizardActions>()(
         ...initialState,
 
         // ────────── Actions ──────────
-        updateFormData: (section, data) => {
-          set((state: any) => {
+        updateFormData: (section: string, data: unknown): void => {
+          set((state: Draft<WizardState>) => {
             state.formData[section] = {
               ...((state.formData as Record<string, any>)[section] ?? {}),
               ...(data as object),
@@ -93,14 +94,14 @@ export const useWizardStore = create<WizardState & WizardActions>()(
           });
         },
 
-        setValidationErrors: (section, errors) => {
-          set((state: any) => {
+        setValidationErrors: (section: string, errors: Record<string, string>): void => {
+          set((state: Draft<WizardState>) => {
             state.validationErrors[section] = errors;
           });
         },
 
-        clearValidationErrors: (section?: string) => {
-          set((state: any) => {
+        clearValidationErrors: (section?: string): void => {
+          set((state: Draft<WizardState>) => {
             if (section) {
               delete state.validationErrors[section];
             } else {
@@ -109,21 +110,21 @@ export const useWizardStore = create<WizardState & WizardActions>()(
           });
         },
 
-        setIsDirty: (dirty: boolean) => {
-          set((state: any) => {
+        setIsDirty: (dirty: boolean): void => {
+          set((state: Draft<WizardState>) => {
             state.isDirty = dirty;
           });
         },
 
-        saveDraft: () => {
-          set((state: any) => {
+        saveDraft: (): void => {
+          set((state: Draft<WizardState>) => {
             state.isDirty = false;
             state.lastSavedAt = new Date();
           });
         },
 
-        resetWizard: () => {
-          set(() => ({ ...initialState }));
+        resetWizard: (): void => {
+          set((): WizardState => ({ ...initialState }));
         },
       })),
       {
