@@ -1,7 +1,6 @@
 import { create, type StateCreator } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
-import type { Draft } from 'immer';
+import { immer, produce, type Draft } from 'zustand/middleware/immer';
 
 // ────────────────────────────────────────────────────────────
 // Types
@@ -78,53 +77,54 @@ const initialState: WizardState = {
 // ────────────────────────────────────────────────────────────
 type StoreSlice = WizardState & WizardActions;
 
-// Define the slice with proper generics so `set` & `get` are typed.
+const immerMutate = <T>(fn: (draft: Draft<T>) => void) => (state: T) => produce(state, fn);
+
 const storeCreator: StateCreator<StoreSlice, [], [], StoreSlice> = (set, get) => ({
   // ────────── State ──────────
   ...initialState,
 
   // ────────── Actions ──────────
   updateFormData: (section: string, data: unknown): void => {
-    set((state: Draft<WizardState>) => {
+    set(immerMutate((state: Draft<StoreSlice>) => {
       state.formData[section] = {
         ...((state.formData as Record<string, any>)[section] ?? {}),
         ...(data as object),
       };
       state.isDirty = true;
-    });
+    }));
   },
 
   setValidationErrors: (section: string, errors: Record<string, string>): void => {
-    set((state: Draft<WizardState>) => {
+    set(immerMutate((state: Draft<StoreSlice>) => {
       state.validationErrors[section] = errors;
-    });
+    }));
   },
 
   clearValidationErrors: (section?: string): void => {
-    set((state: Draft<WizardState>) => {
+    set(immerMutate((state: Draft<StoreSlice>) => {
       if (section) {
         delete state.validationErrors[section];
       } else {
         state.validationErrors = {};
       }
-    });
+    }));
   },
 
   setIsDirty: (dirty: boolean): void => {
-    set((state: Draft<WizardState>) => {
+    set(immerMutate((state: Draft<StoreSlice>) => {
       state.isDirty = dirty;
-    });
+    }));
   },
 
   saveDraft: (): void => {
-    set((state: Draft<WizardState>) => {
+    set(immerMutate((state: Draft<StoreSlice>) => {
       state.isDirty = false;
       state.lastSavedAt = new Date();
-    });
+    }));
   },
 
   resetWizard: (): void => {
-    set((): WizardState => ({ ...initialState }));
+    set((): StoreSlice => ({ ...initialState }));
   },
 });
 
