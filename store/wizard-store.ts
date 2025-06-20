@@ -1,6 +1,6 @@
 import { create, type StateCreator } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
-import { immer, produce, type Draft } from 'zustand/middleware/immer';
+import { produce, type Draft } from 'immer';
 
 // ────────────────────────────────────────────────────────────
 // Types
@@ -77,7 +77,10 @@ const initialState: WizardState = {
 // ────────────────────────────────────────────────────────────
 type StoreSlice = WizardState & WizardActions;
 
-const immerMutate = <T>(fn: (draft: Draft<T>) => void) => (state: T) => produce(state, fn);
+// Helper: wrap an Immer producer so that its return type matches
+// Zustand's `(state) => State | Partial<State>` expectation.
+const immerMutate = <T>(fn: (draft: Draft<T>) => void) => (state: T): T =>
+  produce(state, fn) as T;
 
 const storeCreator: StateCreator<StoreSlice, [], [], StoreSlice> = (set, get) => ({
   // ────────── State ──────────
@@ -130,10 +133,10 @@ const storeCreator: StateCreator<StoreSlice, [], [], StoreSlice> = (set, get) =>
 
 export const useWizardStore = create<StoreSlice>()(
   devtools(
-    persist(immer(storeCreator), {
+    persist(storeCreator, {
       name: 'wizard-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
+      partialize: (state: StoreSlice) => ({
         formData: state.formData,
         lastSavedAt: state.lastSavedAt,
       }),
