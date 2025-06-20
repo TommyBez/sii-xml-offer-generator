@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create, type StateCreator } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { Draft } from 'immer';
@@ -76,69 +76,68 @@ const initialState: WizardState = {
 // ────────────────────────────────────────────────────────────
 // Store definition
 // ────────────────────────────────────────────────────────────
-export const useWizardStore = create<WizardState & WizardActions>()(
-  devtools(
-    persist(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      immer((set: any, get: any) => ({
-        // ────────── State ──────────
-        ...initialState,
+type StoreSlice = WizardState & WizardActions;
 
-        // ────────── Actions ──────────
-        updateFormData: (section: string, data: unknown): void => {
-          set((state: Draft<WizardState>) => {
-            state.formData[section] = {
-              ...((state.formData as Record<string, any>)[section] ?? {}),
-              ...(data as object),
-            };
-            state.isDirty = true;
-          });
-        },
+// Define the slice with proper generics so `set` & `get` are typed.
+const storeCreator: StateCreator<StoreSlice, [], [], StoreSlice> = (set, get) => ({
+  // ────────── State ──────────
+  ...initialState,
 
-        setValidationErrors: (section: string, errors: Record<string, string>): void => {
-          set((state: Draft<WizardState>) => {
-            state.validationErrors[section] = errors;
-          });
-        },
+  // ────────── Actions ──────────
+  updateFormData: (section: string, data: unknown): void => {
+    set((state: Draft<WizardState>) => {
+      state.formData[section] = {
+        ...((state.formData as Record<string, any>)[section] ?? {}),
+        ...(data as object),
+      };
+      state.isDirty = true;
+    });
+  },
 
-        clearValidationErrors: (section?: string): void => {
-          set((state: Draft<WizardState>) => {
-            if (section) {
-              delete state.validationErrors[section];
-            } else {
-              state.validationErrors = {};
-            }
-          });
-        },
+  setValidationErrors: (section: string, errors: Record<string, string>): void => {
+    set((state: Draft<WizardState>) => {
+      state.validationErrors[section] = errors;
+    });
+  },
 
-        setIsDirty: (dirty: boolean): void => {
-          set((state: Draft<WizardState>) => {
-            state.isDirty = dirty;
-          });
-        },
-
-        saveDraft: (): void => {
-          set((state: Draft<WizardState>) => {
-            state.isDirty = false;
-            state.lastSavedAt = new Date();
-          });
-        },
-
-        resetWizard: (): void => {
-          set((): WizardState => ({ ...initialState }));
-        },
-      })),
-      {
-        name: 'wizard-storage',
-        storage: createJSONStorage(() => localStorage),
-        partialize: (state: any) => ({
-          formData: state.formData,
-          lastSavedAt: state.lastSavedAt,
-        }),
+  clearValidationErrors: (section?: string): void => {
+    set((state: Draft<WizardState>) => {
+      if (section) {
+        delete state.validationErrors[section];
+      } else {
+        state.validationErrors = {};
       }
-    ),
-    {
-      name: 'wizard-store',
-    }
+    });
+  },
+
+  setIsDirty: (dirty: boolean): void => {
+    set((state: Draft<WizardState>) => {
+      state.isDirty = dirty;
+    });
+  },
+
+  saveDraft: (): void => {
+    set((state: Draft<WizardState>) => {
+      state.isDirty = false;
+      state.lastSavedAt = new Date();
+    });
+  },
+
+  resetWizard: (): void => {
+    set((): WizardState => ({ ...initialState }));
+  },
+});
+
+export const useWizardStore = create<StoreSlice>()(
+  devtools(
+    persist(immer(storeCreator), {
+      name: 'wizard-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        formData: state.formData,
+        lastSavedAt: state.lastSavedAt,
+      }),
+    }),
+    { name: 'wizard-store' }
   )
 ); 
